@@ -32,7 +32,10 @@
   "devDependencies": {
     "chai": "^2.2.0",
     "grunt": "^0.4.5",
+    "grunt-babel": "^5.0.3",
+    "grunt-contrib-clean": "^0.6.0",
     "grunt-mocha-test": "^0.12.7",
+    "load-grunt-tasks": "^3.3.0",
     "mocha": "^2.3.3",
     "time-grunt": "^1.2.2",
     "ws": "^0.8.0"
