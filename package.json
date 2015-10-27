@@ -24,7 +24,7 @@
   "license": "MIT",
   "homepage": "https://github.com/urosjarc/websocket-rest",
   "scripts": {
-    "postinstall": "grunt build:lib",
+    "install": "grunt build:lib",
     "test": "node test",
     "build": "grunt build:lib"
   },
