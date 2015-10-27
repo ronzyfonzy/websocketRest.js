@@ -52,7 +52,7 @@ class WebsocketRest {
         var self = this;
         this.socket.on('connection', function (socket) {
 
-			self.onConnect(socket);
+			socket = self.onConnect(socket);
 
 			socket.on('close',function(){
 				self.onClose(socket);
