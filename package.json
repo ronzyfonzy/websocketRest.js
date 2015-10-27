@@ -1,0 +1,40 @@
+{
+  "name": "websocket-rest",
+  "version": "0.0.1",
+  "description": "Small websocket lib wraper for ws lib, similar to express.",
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/urosjarc/websocket-rest"
+  },
+  "keywords": [
+    "es6",
+    "micro",
+    "microjs",
+    "websocket-rest"
+  ],
+  "author": {
+    "name": "Uroš Jarc",
+    "email": "jar.fmf@gmail.com",
+    "url": "https://github.com/urosjarc"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/urosjarc/websocket-rest",
+  "scripts": {
+    "test": "node test"
+  },
+  "dependencies": {
+    "http-status-codes": "^1.0.5"
+  },
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "grunt": "^0.4.5",
+    "grunt-mocha-test": "^0.12.7",
+    "mocha": "^2.3.3",
+    "time-grunt": "^1.2.2",
+    "ws": "^0.8.0"
+  }
+}
