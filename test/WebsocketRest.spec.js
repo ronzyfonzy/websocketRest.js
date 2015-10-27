@@ -20,11 +20,13 @@ describe('WebsocketRest', function () {
         websocketRest = new WebsocketRest(socketServer,'0.0.0');
         websocketRest.registerModule('user',user);
         websocketRest.registerModule('device',device);
-        websocketRest.initMsgListener();
+        websocketRest.init();
         done();
     });
 
     beforeEach(function (done) {
+		websocketRest.onClose(function(){});
+		websocketRest.setOnConnect(function(){});
 
         socket = new WebSocket('http://localhost:8080');
 

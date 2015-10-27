@@ -7,6 +7,8 @@ class WebsocketRest {
         this.apiVersion = apiVersion;
         this.modules = {};
 
+		this.onClose = function(socket){};
+		this.onConnect = function(socket){};
     }
 
     _addSocketFunctions(socket) {
@@ -39,9 +41,22 @@ class WebsocketRest {
         }
     }
 
-    initMsgListener() {
+	setOnConnect(func){
+		this.onClose = func;
+	}
+	setOnClose(func){
+		this.onConnect = func;
+	}
+
+    init() {
         var self = this;
         this.socket.on('connection', function (socket) {
+
+			self.onConnect(socket);
+
+			socket.on('close',function(){
+				self.onClose(socket);
+			});
 
             var socket = self._addSocketFunctions(socket);
 
