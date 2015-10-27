@@ -48,17 +48,25 @@ class WebsocketRest {
 		this.onConnect = func;
 	}
 
+	_addSocketKeys(socket){
+		socket.address = socket._socket.remoteAddress;
+		socket.connectedAt = new Date();
+		return socket;
+	}
+
     init() {
         var self = this;
         this.socket.on('connection', function (socket) {
 
-			socket = self.onConnect(socket);
+			var socket = self._addSocketKeys(socket);
+				socket = self._addSocketFunctions(socket);
+
+			self.onConnect(socket);
 
 			socket.on('close',function(){
 				self.onClose(socket);
 			});
 
-            var socket = self._addSocketFunctions(socket);
 
             socket.on('message', function (msg) {
                 var req = JSON.parse(msg);
