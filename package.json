@@ -24,7 +24,6 @@
   "license": "MIT",
   "homepage": "https://github.com/urosjarc/websocket-rest",
   "scripts": {
-    "postinstall": "npm install grunt && grunt build:lib",
     "test": "node test",
     "build": "grunt build:lib"
   },
@@ -33,7 +32,6 @@
   },
   "devDependencies": {
     "chai": "^2.2.0",
-    "grunt": "^0.4.5",
     "grunt-babel": "^5.0.3",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-mocha-test": "^0.12.7",
