@@ -29,7 +29,10 @@
     "build": "grunt build:lib"
   },
   "dependencies": {
-    "http-status-codes": "^1.0.5"
+    "http-status-codes": "^1.0.5",
+    "grunt": "^0.4.5",
+    "grunt-babel": "^5.0.3",
+    "load-grunt-tasks": "^3.3.0"
   },
   "devDependencies": {
     "chai": "^2.2.0",
