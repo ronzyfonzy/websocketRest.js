@@ -1,6 +1,6 @@
 node_modules
 bower_components
-dist
+lib
 
 .idea
 npm-debug.log

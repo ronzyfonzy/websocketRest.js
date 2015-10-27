@@ -31,7 +31,7 @@ module.exports = function (grunt) {
                 experimental: true,
                 modules: "amd"        //This is the line to be added.
             },
-            dist: {
+            lib: {
                 files: [{
                     "expand": true,
                     "cwd": "src/",
@@ -52,7 +52,7 @@ module.exports = function (grunt) {
     grunt.registerTask("build", function () {
         return grunt.task.run([
             'clean:lib',
-            'babel:dist'
+            'babel:lib'
         ]);
     });
 };
