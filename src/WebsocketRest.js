@@ -42,10 +42,10 @@ class WebsocketRest {
     }
 
 	setOnConnect(func){
-		this.onClose = func;
+		this.onConnect = func;
 	}
 	setOnClose(func){
-		this.onConnect = func;
+		this.onClose = func;
 	}
 
 	_addSocketKeys(socket){
