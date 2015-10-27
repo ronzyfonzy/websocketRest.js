@@ -17,12 +17,12 @@ module.exports = function (grunt) {
                 options: {
                     reporter: 'spec'
                 },
-                src: ['test/**/*.js']
+                src: ['./test/**/*.js']
             }
         },
 
         clean: {
-            lib: 'lib/*'
+            lib: './lib/*'
         },
 
         babel: {
@@ -34,9 +34,9 @@ module.exports = function (grunt) {
             lib: {
                 files: [{
                     "expand": true,
-                    "cwd": "src/",
-                    "src": ["**/*.js"],
-                    "dest": "lib/",
+                    "cwd": "./src/",
+                    "src": ["./**/*.js"],
+                    "dest": "./lib/",
                     "ext": ".js"
                 }]
             }
