@@ -1,7 +1,7 @@
 node_modules
 bower_components
-lib
 
+lib
 .idea
 npm-debug.log
 *.map

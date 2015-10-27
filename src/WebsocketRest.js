@@ -7,6 +7,8 @@ class WebsocketRest {
         this.apiVersion = apiVersion;
         this.modules = {};
 
+		this.onClose = function(socket){};
+		this.onConnect = function(socket){};
     }
 
     _addSocketFunctions(socket) {
@@ -39,11 +41,32 @@ class WebsocketRest {
         }
     }
 
-    initMsgListener() {
+	setOnConnect(func){
+		this.onConnect = func;
+	}
+	setOnClose(func){
+		this.onClose = func;
+	}
+
+	_addSocketKeys(socket){
+		socket.address = socket._socket.remoteAddress;
+		socket.connectedAt = new Date();
+		return socket;
+	}
+
+    init() {
         var self = this;
         this.socket.on('connection', function (socket) {
 
-            var socket = self._addSocketFunctions(socket);
+			var socket = self._addSocketKeys(socket);
+				socket = self._addSocketFunctions(socket);
+
+			self.onConnect(socket);
+
+			socket.on('close',function(){
+				self.onClose(socket);
+			});
+
 
             socket.on('message', function (msg) {
                 var req = JSON.parse(msg);
