@@ -24,12 +24,13 @@
   "license": "MIT",
   "homepage": "https://github.com/urosjarc/websocket-rest",
   "scripts": {
-    "install" : "npm build",
+    "install": "grunt build:lib",
     "test": "node test",
-    "build" : "grunt build:lib"
+    "build": "grunt build:lib"
   },
   "dependencies": {
-    "http-status-codes": "^1.0.5"
+    "http-status-codes": "^1.0.5",
+    "websocket-rest": "urosjarc/websocketRest.js#development"
   },
   "devDependencies": {
     "chai": "^2.2.0",
