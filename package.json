@@ -28,7 +28,8 @@
     "build": "grunt build:lib"
   },
   "dependencies": {
-    "http-status-codes": "^1.0.5"
+    "http-status-codes": "^1.0.5",
+    "query-string": "^3.0.0"
   },
   "devDependencies": {
     "chai": "^2.2.0",
