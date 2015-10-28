@@ -1,5 +1,6 @@
 "use strict";
 var status = require('http-status-codes');
+var queryString = require('query-string');
 
 class WebsocketRest {
     constructor(socket, apiVersion) {
@@ -20,11 +21,14 @@ class WebsocketRest {
                 data: data
             }));
         };
-        socket.error = function (msg, code, errors) {
+        socket.error = function (msg,errors, code) {
+
+			code = code || 500;
+
             this.send(JSON.stringify({
                 apiVersion: self.apiVersion,
                 error: {
-                    code: code || 500,
+                    code: code,
                     message: status.getStatusText(code),
                     errors: errors
                 }
@@ -49,7 +53,10 @@ class WebsocketRest {
 	}
 
 	_addSocketKeys(socket){
-		socket.address = socket._socket.remoteAddress;
+		//Todo...
+		socket.address = socket.upgradeReq.connection.remoteAddress;
+		socket.params = queryString.parse(queryString.extract( socket.upgradeReq.url) );
+		socket.headers = socket.upgradeReq.headers;
 		socket.connectedAt = new Date();
 		return socket;
 	}
@@ -69,9 +76,9 @@ class WebsocketRest {
 
 
             socket.on('message', function (msg) {
-                var req = JSON.parse(msg);
+                var req = JSON.parse(msg || "{}");
 
-                var reqKeys = ['module', 'method', 'body'];
+                var reqKeys = ['module', 'method'];
                 var keyError = [];
                 for (var i in reqKeys) {
                     if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
@@ -79,9 +86,7 @@ class WebsocketRest {
                 if (keyError.length != 0) {
                     var err = `Keys: [${keyError}] not in request!`;
                     console.error(err);
-                    socket.error(err,status.BAD_REQUEST,[
-                        err
-                    ]);
+                    socket.error(err,[err],status.BAD_REQUEST);
 
                 } else {
                     self.modules[req['module']][req['method']](req, socket);

@@ -4,11 +4,10 @@ var should = require('chai').should();
 var WebsocketRest = require('../src');
 
 var WebSocket = require('ws');
-var user = require('./modules/user');
-var device = require('./modules/device');
+var test = require('./modules/test');
 
 var WebSocketServer = require('ws').Server;
-var socketServer = new WebSocketServer({port: 8080});
+var socketServer = new WebSocketServer({port: 9000});
 
 describe('WebsocketRest', function () {
 
@@ -18,8 +17,7 @@ describe('WebsocketRest', function () {
     before(function(done){
 
         websocketRest = new WebsocketRest(socketServer,'0.0.0');
-        websocketRest.registerModule('user',user);
-        websocketRest.registerModule('device',device);
+        websocketRest.registerModule('test',test);
         websocketRest.init();
         done();
     });
@@ -28,7 +26,7 @@ describe('WebsocketRest', function () {
 		websocketRest.onClose(function(){});
 		websocketRest.setOnConnect(function(){});
 
-        socket = new WebSocket('http://localhost:8080');
+        socket = new WebSocket('http://localhost:9000?param0=param');
 
         socket.on('open',function(){
             done();
@@ -46,7 +44,7 @@ describe('WebsocketRest', function () {
 
     });
 
-    describe('Socket send functions',function(){
+    describe('send functions',function(){
         it('should responde with error on bad request',function(done){
             socket.on('message', function (msg) {
                 msg.should.be.equal(JSON.stringify({
@@ -54,31 +52,110 @@ describe('WebsocketRest', function () {
                     "error" : {
                         "code" : 400,
                         "message" : "Bad Request",
-                        "errors": ["Keys: [module,method,body] not in request!"]
+                        "errors": ["Keys: [module,method] not in request!"]
                     }
                 }));
                 done();
             });
-            socket.send(JSON.stringify({
-            }));
+            socket.send();
 
         });
 
-        it('should responde on client msg', function (done) {
+        it('data should be in socket', function (done) {
             socket.on('message',function(msg){
                 msg.should.be.equal(JSON.stringify({
                     "apiVersion": "0.0.0",
-                    "data": "user.GetUser"
+                    "data": "dataResponse"
                 }));
                 done();
             });
 
             socket.send(JSON.stringify({
-                module: 'user',
-                method: 'getUser',
-                body: 'sdlafjasldkf'
+                module: 'test',
+                method: 'dataResponse',
+                data: 'test.dataResponse'
             }));
-
         });
-    })
+
+		it('error should in socket',function(done){
+			socket.on('message',function(msg){
+				msg.should.be.equal(JSON.stringify({
+					"apiVersion": "0.0.0",
+					"error" : {
+						"code": 500,
+						"message": "Server Error",
+						"errors": [
+							"error0",
+							"error1"
+						]
+					}
+				}));
+				done();
+			});
+
+			socket.send(JSON.stringify({
+				module: 'test',
+				method: 'errorResponse',
+				data: 'test.errorResponse'
+			}));
+
+		})
+    });
+
+	describe('additional params',function(){
+
+		it('should have address',function(done){
+			socket.on('message', function (msg) {
+				msg.should.be.equal("127.0.0.1");
+				done();
+			});
+			socket.send(JSON.stringify({
+				module : 'test',
+				method : 'returnAddress'
+			}));
+		});
+
+		it('should have returnParams', function (done) {
+			socket.on('message', function (msg) {
+				msg.should.be.equal(JSON.stringify({
+					"apiVersion" : "0.0.0",
+					"data" : {
+						"param0" : "param"
+					}
+				}));
+				done();
+			});
+			socket.send(JSON.stringify({
+				'module': 'test',
+				'method': 'returnParams'
+			}));
+		});
+
+		it('should have returnHeaders', function (done) {
+			socket.on('message', function (msg) {
+				msg.should.be.equal(JSON.stringify({
+					"apiVersion": "0.0.0",
+					"data": "localhost:9000"
+				}));
+				done();
+			});
+			socket.send(JSON.stringify({
+				'module': 'test',
+				'method': 'returnHeaders'
+			}));
+		});
+
+		it('should have connectedAt', function (done) {
+			socket.on('message', function (msg) {
+				JSON.parse(msg).data.should.be.a("string");
+				done();
+			});
+			socket.send(JSON.stringify({
+				'module': 'test',
+				'method': 'connectedAt'
+			}));
+		});
+	});
+
+
 });
