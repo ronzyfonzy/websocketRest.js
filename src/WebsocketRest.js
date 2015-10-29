@@ -38,6 +38,14 @@ class WebsocketRest {
     }
 
     registerModule(moduleName, module) {
+
+		//Remove all private methods
+		for(var method in module){
+			if(method[0] == '_'){
+				delete module[method];
+			}
+		}
+
         if (moduleName in this.modules) {
             throw new Error(moduleName + ' is allready in registered modules!');
         } else {

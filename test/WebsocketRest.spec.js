@@ -44,6 +44,13 @@ describe('WebsocketRest', function () {
 
     });
 
+	describe('methods',function(){
+		it('registerModule should not register private methods',function(done){
+			websocketRest.modules.should.not.have.property('_privateMethod');
+            done();
+		});
+	});
+
     describe('send functions',function(){
         it('should responde with error on bad request',function(done){
             socket.on('message', function (msg) {
