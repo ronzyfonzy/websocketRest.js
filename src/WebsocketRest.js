@@ -41,7 +41,7 @@ class WebsocketRest {
 
 		//Remove all private methods
 		for(var method in module){
-			if(method[0] == '_'){
+			if(!method.indexOf("private")){
 				delete module[method];
 			}
 		}

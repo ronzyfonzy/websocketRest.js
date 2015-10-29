@@ -24,4 +24,5 @@ exports.connectedAt = function(req,socket){
 	socket.data(socket.connectedAt);
 };
 
-exports._privateMethod = function(req,socket){ };
+exports.privateMethod = function(){};
+exports.private_method = function(){};

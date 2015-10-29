@@ -45,8 +45,9 @@ describe('WebsocketRest', function () {
     });
 
 	describe('methods',function(){
-		it('registerModule should not register private methods',function(done){
-			websocketRest.modules.should.not.have.property('_privateMethod');
+		it('registerModule should not register methods with private in name',function(done){
+			console.log(websocketRest.modules);
+			websocketRest.modules['test'].should.not.have.keys(['privateMethod','private_method']);
             done();
 		});
 	});
@@ -109,7 +110,7 @@ describe('WebsocketRest', function () {
 		})
     });
 
-	describe('additional params',function(){
+	describe('additional keys',function(){
 
 		it('should have address',function(done){
 			socket.on('message', function (msg) {
