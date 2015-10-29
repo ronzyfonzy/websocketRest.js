@@ -44,11 +44,23 @@ describe('WebsocketRest', function () {
 
     });
 
-	describe('methods',function(){
-		it('registerModule should not register methods with private in name',function(done){
-			console.log(websocketRest.modules);
-			websocketRest.modules['test'].should.not.have.keys(['privateMethod','private_method']);
-            done();
+	describe('registerModule',function(){
+		it('should not call methods with private in name',function(done){
+			socket.on('message', function (msg) {
+				msg.should.be.equal(JSON.stringify({
+                    "apiVersion" : "0.0.0",
+					"error" : {
+						"code": 405,
+						"message": "Method Not Allowed",
+						"errors": ["You can not call private methods!"]
+					}
+                }));
+				done();
+			});
+			socket.send(JSON.stringify({
+				"module": 'test',
+				"method": 'privateMethod'
+			}));
 		});
 	});
 
