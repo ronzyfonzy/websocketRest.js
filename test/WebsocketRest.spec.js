@@ -44,6 +44,26 @@ describe('WebsocketRest', function () {
 
     });
 
+	describe('registerModule',function(){
+		it('should not call methods with private in name',function(done){
+			socket.on('message', function (msg) {
+				msg.should.be.equal(JSON.stringify({
+                    "apiVersion" : "0.0.0",
+					"error" : {
+						"code": 405,
+						"message": "Method Not Allowed",
+						"errors": ["You can not call private methods!"]
+					}
+                }));
+				done();
+			});
+			socket.send(JSON.stringify({
+				"module": 'test',
+				"method": 'privateMethod'
+			}));
+		});
+	});
+
     describe('send functions',function(){
         it('should responde with error on bad request',function(done){
             socket.on('message', function (msg) {
@@ -102,7 +122,7 @@ describe('WebsocketRest', function () {
 		})
     });
 
-	describe('additional params',function(){
+	describe('additional keys',function(){
 
 		it('should have address',function(done){
 			socket.on('message', function (msg) {

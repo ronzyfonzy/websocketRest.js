@@ -78,6 +78,7 @@ class WebsocketRest {
             socket.on('message', function (msg) {
                 var req = JSON.parse(msg || "{}");
 
+				//check req
                 var reqKeys = ['module', 'method'];
                 var keyError = [];
                 for (var i in reqKeys) {
@@ -88,7 +89,11 @@ class WebsocketRest {
                     console.error(err);
                     socket.error(err,[err],status.BAD_REQUEST);
 
-                } else {
+                } else if(0 == req.method.indexOf("private")){
+					var err = `You can not call private methods!`;
+					console.error(err);
+					socket.error(err,[err],status.METHOD_NOT_ALLOWED);
+				} else {
                     self.modules[req['module']][req['method']](req, socket);
                 }
             });

@@ -23,3 +23,6 @@ exports.returnHeaders = function(req,socket){
 exports.connectedAt = function(req,socket){
 	socket.data(socket.connectedAt);
 };
+
+exports.privateMethod = function(){};
+exports.private_method = function(){};
