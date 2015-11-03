@@ -24,15 +24,18 @@ class WebsocketRest {
         socket.error = function (msg,errors, code) {
 
 			code = code || 500;
-
-            this.send(JSON.stringify({
+            let res = JSON.stringify({
                 apiVersion: self.apiVersion,
                 error: {
                     code: code,
                     message: status.getStatusText(code),
                     errors: errors
                 }
-            }));
+            });
+            this.send(res);
+			this.close();
+
+			console.error(`WebsocketRest.error = ${res}`);
         };
         return socket;
     }
