@@ -16,8 +16,10 @@ class WebsocketRest {
         var self = this;
         //https://google-styleguide.googlecode.com/svn/trunk/jsoncstyleguide.xml
         socket.data = function (data, code) {
+			code = code || 200;
             this.send(JSON.stringify({
                 apiVersion: self.apiVersion,
+				code : code,
                 data: data
             }));
         };
