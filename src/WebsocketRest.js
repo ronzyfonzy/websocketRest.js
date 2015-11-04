@@ -28,8 +28,8 @@ class WebsocketRest {
 			code = code || 500;
             let res = JSON.stringify({
                 apiVersion: self.apiVersion,
+				code: code,
                 error: {
-                    code: code,
                     message: msg,
                     errors: errors
                 }
