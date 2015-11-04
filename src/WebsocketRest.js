@@ -23,21 +23,31 @@ class WebsocketRest {
                 data: data
             }));
         };
-        socket.error = function (msg,errors, code) {
+		socket.info = function (message, code) {
+
+			code = code || 200;
+			let res = JSON.stringify({
+				apiVersion: self.apiVersion,
+				code: code,
+				data: {
+					message: message
+				}
+			});
+			this.send(res);
+		};
+        socket.error = function (message,errors, code) {
 
 			code = code || 500;
             let res = JSON.stringify({
                 apiVersion: self.apiVersion,
 				code: code,
                 error: {
-                    message: msg,
+                    message: message,
                     errors: errors
                 }
             });
             this.send(res);
 			this.close();
-
-			console.error(`WebsocketRest.error = ${res}`);
         };
         return socket;
     }
