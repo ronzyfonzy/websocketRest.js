@@ -28,7 +28,7 @@ class WebsocketRest {
                 apiVersion: self.apiVersion,
                 error: {
                     code: code,
-                    message: status.getStatusText(code),
+                    message: msg,
                     errors: errors
                 }
             });
