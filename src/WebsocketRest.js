@@ -19,6 +19,8 @@ class WebsocketRest {
 			code = code || 200;
             this.send(JSON.stringify({
                 apiVersion: self.apiVersion,
+				method: this.REST.method,
+				module: this.REST.module,
 				code : code,
                 data: data
             }));
@@ -28,6 +30,8 @@ class WebsocketRest {
 			code = code || 200;
 			let res = JSON.stringify({
 				apiVersion: self.apiVersion,
+				method: this.REST.method,
+				module: this.REST.module,
 				code: code,
 				data: {
 					message: message
@@ -40,6 +44,8 @@ class WebsocketRest {
 			code = code || 500;
             let res = JSON.stringify({
                 apiVersion: self.apiVersion,
+				method: this.REST.method,
+				module: this.REST.module,
 				code: code,
                 error: {
                     message: message,
@@ -73,6 +79,10 @@ class WebsocketRest {
 		socket.params = queryString.parse(queryString.extract( socket.upgradeReq.url) );
 		socket.headers = socket.upgradeReq.headers;
 		socket.connectedAt = new Date();
+		socket.REST = {
+			'method' : null,
+			'module' : null
+		};
 		return socket;
 	}
 
@@ -109,6 +119,9 @@ class WebsocketRest {
 					console.error(err);
 					socket.error(err,[err],status.METHOD_NOT_ALLOWED);
 				} else {
+					self.socket.REST.module = req['module'];
+					self.socket.REST.method = req['method'];
+
                     self.modules[req['module']][req['method']](req, socket);
                 }
             });
