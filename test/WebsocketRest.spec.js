@@ -49,8 +49,10 @@ describe('WebsocketRest', function () {
 			socket.on('message', function (msg) {
 				msg.should.be.equal(JSON.stringify({
                     "apiVersion" : "0.0.0",
+					"method" : "connect",
+					"module" : "event",
+					"code": 405,
 					"error" : {
-						"code": 405,
 						"message": "Method Not Allowed",
 						"errors": ["You can not call private methods!"]
 					}
@@ -69,8 +71,10 @@ describe('WebsocketRest', function () {
             socket.on('message', function (msg) {
                 msg.should.be.equal(JSON.stringify({
                     "apiVersion" : "0.0.0",
+					"method" : "connect",
+					"module" : "event",
+					"code" : 400,
                     "error" : {
-                        "code" : 400,
                         "message" : "Bad Request",
                         "errors": ["Keys: [module,method] not in request!"]
                     }
@@ -85,6 +89,9 @@ describe('WebsocketRest', function () {
             socket.on('message',function(msg){
                 msg.should.be.equal(JSON.stringify({
                     "apiVersion": "0.0.0",
+					method: 'dataResponse',
+					module: 'test',
+					code : 200,
                     "data": "dataResponse"
                 }));
                 done();
@@ -97,13 +104,15 @@ describe('WebsocketRest', function () {
             }));
         });
 
-		it('error should in socket',function(done){
+		it('error should be in socket',function(done){
 			socket.on('message',function(msg){
 				msg.should.be.equal(JSON.stringify({
 					"apiVersion": "0.0.0",
+					method: 'errorResponse',
+					module: 'test',
+					"code": 500,
 					"error" : {
-						"code": 500,
-						"message": "Server Error",
+						"message": "errorResponse",
 						"errors": [
 							"error0",
 							"error1"
@@ -139,6 +148,9 @@ describe('WebsocketRest', function () {
 			socket.on('message', function (msg) {
 				msg.should.be.equal(JSON.stringify({
 					"apiVersion" : "0.0.0",
+					'method': 'returnParams',
+					'module': 'test',
+					code: 200,
 					"data" : {
 						"param0" : "param"
 					}
@@ -155,6 +167,9 @@ describe('WebsocketRest', function () {
 			socket.on('message', function (msg) {
 				msg.should.be.equal(JSON.stringify({
 					"apiVersion": "0.0.0",
+					'method': 'returnHeaders',
+					'module': 'test',
+					code: 200,
 					"data": "localhost:9000"
 				}));
 				done();

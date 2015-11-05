@@ -80,8 +80,8 @@ class WebsocketRest {
 		socket.headers = socket.upgradeReq.headers;
 		socket.connectedAt = new Date();
 		socket.REST = {
-			'method' : null,
-			'module' : null
+			'method' : 'connect',
+			'module' : 'event'
 		};
 		return socket;
 	}
@@ -112,15 +112,15 @@ class WebsocketRest {
                 if (keyError.length != 0) {
                     var err = `Keys: [${keyError}] not in request!`;
                     console.error(err);
-                    socket.error(err,[err],status.BAD_REQUEST);
+                    socket.error(status.getStatusText(status.BAD_REQUEST),[err],status.BAD_REQUEST);
 
                 } else if(0 == req.method.indexOf("private")){
 					var err = `You can not call private methods!`;
 					console.error(err);
-					socket.error(err,[err],status.METHOD_NOT_ALLOWED);
+					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
 				} else {
-					self.socket.REST.module = req['module'];
-					self.socket.REST.method = req['method'];
+					socket.REST.module = req['module'];
+					socket.REST.method = req['method'];
 
                     self.modules[req['module']][req['method']](req, socket);
                 }
