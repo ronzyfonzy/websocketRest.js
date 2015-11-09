@@ -103,6 +103,8 @@ class WebsocketRest {
             socket.on('message', function (msg) {
                 var req = JSON.parse(msg || "{}");
 
+				console.error(msg);
+
 				//check req
                 var reqKeys = ['module', 'method'];
                 var keyError = [];
