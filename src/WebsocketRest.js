@@ -16,26 +16,44 @@ class WebsocketRest {
         var self = this;
         //https://google-styleguide.googlecode.com/svn/trunk/jsoncstyleguide.xml
         socket.data = function (data, code) {
+			code = code || 200;
             this.send(JSON.stringify({
                 apiVersion: self.apiVersion,
+				method: this.REST.method,
+				module: this.REST.module,
+				code : code,
                 data: data
             }));
         };
-        socket.error = function (msg,errors, code) {
+		socket.info = function (message, code) {
+
+			code = code || 200;
+			let res = JSON.stringify({
+				apiVersion: self.apiVersion,
+				method: this.REST.method,
+				module: this.REST.module,
+				code: code,
+				data: {
+					message: message
+				}
+			});
+			this.send(res);
+		};
+        socket.error = function (message,errors, code) {
 
 			code = code || 500;
             let res = JSON.stringify({
                 apiVersion: self.apiVersion,
+				method: this.REST.method,
+				module: this.REST.module,
+				code: code,
                 error: {
-                    code: code,
-                    message: status.getStatusText(code),
+                    message: message,
                     errors: errors
                 }
             });
             this.send(res);
 			this.close();
-
-			console.error(`WebsocketRest.error = ${res}`);
         };
         return socket;
     }
@@ -61,6 +79,10 @@ class WebsocketRest {
 		socket.params = queryString.parse(queryString.extract( socket.upgradeReq.url) );
 		socket.headers = socket.upgradeReq.headers;
 		socket.connectedAt = new Date();
+		socket.REST = {
+			'method' : 'connect',
+			'module' : 'event'
+		};
 		return socket;
 	}
 
@@ -90,13 +112,16 @@ class WebsocketRest {
                 if (keyError.length != 0) {
                     var err = `Keys: [${keyError}] not in request!`;
                     console.error(err);
-                    socket.error(err,[err],status.BAD_REQUEST);
+                    socket.error(status.getStatusText(status.BAD_REQUEST),[err],status.BAD_REQUEST);
 
                 } else if(0 == req.method.indexOf("private")){
 					var err = `You can not call private methods!`;
 					console.error(err);
-					socket.error(err,[err],status.METHOD_NOT_ALLOWED);
+					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
 				} else {
+					socket.REST.module = req['module'];
+					socket.REST.method = req['method'];
+
                     self.modules[req['module']][req['method']](req, socket);
                 }
             });
