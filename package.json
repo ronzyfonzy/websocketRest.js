@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Small websocket lib wraper for ws lib, similar to express.",
   "directories": {
-    "lib": "./src"
+    "src": "./src"
   },
   "main": "./src/index.js",
   "repository": {
