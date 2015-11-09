@@ -2,10 +2,10 @@
   "name": "websocket-rest",
   "version": "0.0.1",
   "description": "Small websocket lib wraper for ws lib, similar to express.",
-  "main": "./src/index.js",
+  "main": "./bin/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/urosjarc/websocket-rest"
+    "url": "https://github.com/urosjarc/websocketRest.js"
   },
   "keywords": [
     "es6",
