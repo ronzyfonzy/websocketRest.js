@@ -1,7 +1,7 @@
 "use strict";
 
 var should = require('chai').should();
-var WebsocketRest = require('../src');
+var WebsocketRest = require('../bin');
 
 var WebSocket = require('ws');
 var test = require('./modules/test');
@@ -144,6 +144,17 @@ describe('WebsocketRest', function () {
 			}));
 		});
 
+		it('should have key',function(done){
+			socket.on('message', function (msg) {
+				msg.should.be.a("string");
+				done();
+			});
+			socket.send(JSON.stringify({
+				module : 'test',
+				method : 'returnKey'
+			}));
+		});
+
 		it('should have returnParams', function (done) {
 			socket.on('message', function (msg) {
 				msg.should.be.equal(JSON.stringify({
@@ -192,5 +203,14 @@ describe('WebsocketRest', function () {
 		});
 	});
 
-
+	describe('getConnectedClient',function(){
+		it('should return socket',function(done){
+			socket.on('message', function () {
+				var key = socket._socket._httpMessage._headers['sec-websocket-key'];
+				WebsocketRest.getConnectedClient(key).key.should.be.equal(key);
+				done();
+			});
+			socket.send();
+		});
+	})
 });

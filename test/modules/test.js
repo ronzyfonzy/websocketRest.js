@@ -19,7 +19,12 @@ exports.returnParams = function(req,socket){
 exports.returnHeaders = function(req,socket){
 	socket.data(socket.headers.host);
 };
-
+exports.connectedAt = function (req, socket) {
+	socket.data(socket.connectedAt);
+};
+exports.returnKey = function (req, socket) {
+	socket.send(socket.key);
+};
 exports.connectedAt = function(req,socket){
 	socket.data(socket.connectedAt);
 };

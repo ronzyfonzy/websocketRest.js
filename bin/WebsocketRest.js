@@ -2,8 +2,12 @@
 var status = require('http-status-codes');
 var queryString = require('query-string');
 
+var connectedClients = {};
+
 class WebsocketRest {
+
     constructor(socket, apiVersion) {
+
         this.socket = socket;
         this.apiVersion = apiVersion;
         this.modules = {};
@@ -11,6 +15,10 @@ class WebsocketRest {
 		this.onClose = function(socket){};
 		this.onConnect = function(socket){};
     }
+
+	static getConnectedClient(key){
+		return connectedClients[key];
+	}
 
     _addSocketFunctions(socket) {
         var self = this;
@@ -67,17 +75,26 @@ class WebsocketRest {
     }
 
 	setOnConnect(func){
-		this.onConnect = func;
+		this.onConnect = function(socket){
+			func();
+			//After user logic is executed ok socket is added
+			connectedClients[socket.key] = socket;
+		};
+
 	}
 	setOnClose(func){
-		this.onClose = func;
+		this.onClose = function(socket){
+			//Before close logic is called we remove!
+			delete connectedClients[socket.key];
+			func();
+		}
 	}
 
 	_addSocketKeys(socket){
-		//Todo...
 		socket.address = socket.upgradeReq.connection.remoteAddress;
 		socket.params = queryString.parse(queryString.extract( socket.upgradeReq.url) );
 		socket.headers = socket.upgradeReq.headers;
+		socket.key = socket.headers['sec-websocket-key'];
 		socket.connectedAt = new Date();
 		socket.REST = {
 			'method' : 'connect',
@@ -98,7 +115,6 @@ class WebsocketRest {
 			socket.on('close',function(){
 				self.onClose(socket);
 			});
-
 
             socket.on('message', function (msg) {
                 var req = JSON.parse(msg || "{}");
