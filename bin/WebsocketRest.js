@@ -2,25 +2,27 @@
 var status = require('http-status-codes');
 var queryString = require('query-string');
 
-var connectedClients = {};
-
 class WebsocketRest {
-
-    constructor(socket, apiVersion) {
-
-        this.socket = socket;
-        this.apiVersion = apiVersion;
-        this.modules = {};
+	constructor(){
+		this.socket = null;
+		this.apiVersion = null;
+		this.modules = {};
+		this._connectedClients = {};
 
 		this.onClose = function(socket){};
 		this.onConnect = function(socket){};
+	}
+
+    init(socket, apiVersion) {
+        this.socket = socket;
+        this.apiVersion = apiVersion;
     }
 
-	static getConnectedClient(key){
-		return connectedClients[key];
+	getConnectedClient(key){
+		return this._connectedClients[key];
 	}
-	static getConnectedClients(){
-		return connectedClients;
+	getConnectedClients(){
+		return this._connectedClients;
 	}
 
     _addSocketFunctions(socket) {
@@ -78,10 +80,11 @@ class WebsocketRest {
     }
 
 	setOnConnect(func){
+		var self = this;
 		this.onConnect = function(socket){
 			func(socket);
 			//After user logic is executed ok socket is added
-			connectedClients[socket.key] = socket;
+			self._connectedClients[socket.key] = socket;
 		};
 
 	}
@@ -102,7 +105,7 @@ class WebsocketRest {
 		return socket;
 	}
 
-    init() {
+    initServer() {
         var self = this;
         this.socket.on('connection', function (socket) {
 
@@ -112,7 +115,7 @@ class WebsocketRest {
 			self.onConnect(socket);
 
 			socket.on('close',function(){
-				delete connectedClients[socket.key];
+				delete self._connectedClients[socket.key];
 				self.onClose(socket);
 			});
 
@@ -147,4 +150,4 @@ class WebsocketRest {
     }
 }
 
-module.exports = WebsocketRest;
+module.exports = new WebsocketRest();
