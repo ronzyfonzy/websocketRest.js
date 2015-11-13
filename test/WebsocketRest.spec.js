@@ -203,6 +203,18 @@ describe('WebsocketRest', function () {
 		});
 	});
 
+	describe('getConnectedClients',function(){
+		it('should return socket',function(done){
+			socket.on('message', function () {
+				var key = socket._socket._httpMessage._headers['sec-websocket-key'];
+				WebsocketRest.getConnectedClients()[key].key.should.be.equal(key);
+				Object.keys(WebsocketRest.getConnectedClients()).length.should.be.equal(1);
+				done();
+			});
+			socket.send();
+		});
+	});
+
 	describe('getConnectedClient',function(){
 		it('should return socket',function(done){
 			socket.on('message', function () {
@@ -212,5 +224,5 @@ describe('WebsocketRest', function () {
 			});
 			socket.send();
 		});
-	})
+	});
 });

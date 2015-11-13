@@ -19,6 +19,9 @@ class WebsocketRest {
 	static getConnectedClient(key){
 		return connectedClients[key];
 	}
+	static getConnectedClients(){
+		return connectedClients;
+	}
 
     _addSocketFunctions(socket) {
         var self = this;
@@ -83,11 +86,7 @@ class WebsocketRest {
 
 	}
 	setOnClose(func){
-		this.onClose = function(socket){
-			//Before close logic is called we remove!
-			delete connectedClients[socket.key];
-			func();
-		}
+		this.onClose = func;
 	}
 
 	_addSocketKeys(socket){
@@ -113,6 +112,7 @@ class WebsocketRest {
 			self.onConnect(socket);
 
 			socket.on('close',function(){
+				delete connectedClients[socket.key];
 				self.onClose(socket);
 			});
 
