@@ -79,7 +79,7 @@ class WebsocketRest {
 
 	setOnConnect(func){
 		this.onConnect = function(socket){
-			func();
+			func(socket);
 			//After user logic is executed ok socket is added
 			connectedClients[socket.key] = socket;
 		};
