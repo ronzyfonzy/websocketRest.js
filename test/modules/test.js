@@ -12,8 +12,8 @@ exports.returnAddress= function(req,socket){
 	socket.send(socket.address);
 };
 
-exports.returnParams = function(req,socket){
-	socket.data(socket.params,200);
+exports.returnQuery = function(req,socket){
+	socket.data(socket.query,200);
 };
 
 exports.returnHeaders = function(req,socket){

@@ -154,11 +154,11 @@ describe('WebsocketRest', function () {
 			}));
 		});
 
-		it('should have returnParams', function (done) {
+		it('should have returnQuery', function (done) {
 			socket.on('message', function (msg) {
 				msg.should.be.equal(JSON.stringify({
 					"apiVersion" : "0.0.0",
-					'method': 'returnParams',
+					'method': 'returnQuery',
 					'module': 'test',
 					code: 200,
 					"data" : {
@@ -169,7 +169,7 @@ describe('WebsocketRest', function () {
 			});
 			socket.send(JSON.stringify({
 				'module': 'test',
-				'method': 'returnParams'
+				'method': 'returnQuery'
 			}));
 		});
 
