@@ -5,22 +5,27 @@ var addSocketResponse = require('./socket/response');
 var addSocketKeys = require('./socket/keys');
 
 class WebsocketRest {
-    constructor(socket, apiVersion) {
-        this.socket = socket;
-        this.apiVersion = apiVersion;
-        this.modules = {};
+	constructor(){
+		this.socket = null;
+		this.apiVersion = null;
+		this.modules = {};
+		this._connectedClients = {};
 
 		this.onClose = function(socket){};
 		this.onConnect = function(socket){};
+	}
+
+    init(socket, apiVersion) {
+        this.socket = socket;
+        this.apiVersion = apiVersion;
     }
 
-    _addSocketFunctions(socket) {
-        var self = this;
-        //https://google-styleguide.googlecode.com/svn/trunk/jsoncstyleguide.xml
-
-
-        return socket;
-    }
+	getConnectedClient(key){
+		return this._connectedClients[key];
+	}
+	getConnectedClients(){
+		return this._connectedClients;
+	}
 
     registerModule(moduleName, module) {
         if (moduleName in this.modules) {
@@ -31,14 +36,20 @@ class WebsocketRest {
     }
 
 	setOnConnect(func){
-		this.onConnect = func;
+		var self = this;
+		this.onConnect = function(socket){
+			func(socket);
+			//After user logic is executed ok socket is added
+			self._connectedClients[socket.key] = socket;
+		};
+
 	}
 	setOnClose(func){
 		this.onClose = func;
 	}
 
 
-    init() {
+    initServer() {
         var self = this;
         this.socket.on('connection', function (socket) {
 
@@ -48,6 +59,7 @@ class WebsocketRest {
 			self.onConnect(socket);
 
 			socket.on('close',function(){
+				delete self._connectedClients[socket.key];
 				self.onClose(socket);
 			});
 
@@ -82,4 +94,4 @@ class WebsocketRest {
     }
 }
 
-module.exports = WebsocketRest;
+module.exports = new WebsocketRest();
