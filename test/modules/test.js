@@ -25,6 +25,9 @@ exports.connectedAt = function (req, socket) {
 exports.returnKey = function (req, socket) {
 	socket.send(socket.key);
 };
+exports.returnUrlPath = function (req, socket) {
+	socket.data(socket.urlPath,200);
+};
 exports.connectedAt = function(req,socket){
 	socket.data(socket.connectedAt,200);
 };

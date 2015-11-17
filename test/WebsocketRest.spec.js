@@ -25,7 +25,7 @@ describe('WebsocketRest', function () {
 		websocketRest.onClose(function(){});
 		websocketRest.setOnConnect(function(){});
 
-        socket = new WebSocket('http://localhost:9000?param0=param');
+        socket = new WebSocket('http://localhost:9000/api/test?param0=param');
 
         socket.on('open',function(){
             done();
@@ -151,6 +151,23 @@ describe('WebsocketRest', function () {
 			socket.send(JSON.stringify({
 				module : 'test',
 				method : 'returnKey'
+			}));
+		});
+
+		it('should have urlPath', function (done) {
+			socket.on('message', function (msg) {
+				msg.should.be.equal(JSON.stringify({
+					"apiVersion": "0.0.0",
+					'method': 'returnUrlPath',
+					'module': 'test',
+					code: 200,
+					"data": ['api','test']
+				}));
+				done();
+			});
+			socket.send(JSON.stringify({
+				module: 'test',
+				method: 'returnUrlPath'
 			}));
 		});
 
