@@ -17,13 +17,13 @@ describe('WebsocketRest', function () {
 
         websocketRest.init(socketServer,'0.0.0');
         websocketRest.registerModule('test',test);
+	    websocketRest.registerOnConnectUrl('/api/test',function(socket){});
+	    websocketRest.registerOnCloseUrl('/api/test',function(socket){});
         websocketRest.initServer();
         done();
     });
 
     beforeEach(function (done) {
-		websocketRest.onClose(function(){});
-		websocketRest.setOnConnect(function(){});
 
         socket = new WebSocket('http://localhost:9000/api/test?param0=param');
 
@@ -161,7 +161,7 @@ describe('WebsocketRest', function () {
 					'method': 'returnUrlPath',
 					'module': 'test',
 					code: 200,
-					"data": ['api','test']
+					"data": '/api/test'
 				}));
 				done();
 			});
