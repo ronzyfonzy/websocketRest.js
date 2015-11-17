@@ -41,9 +41,19 @@ class WebsocketRest {
 			throw new Error(url + ' is allready in registered connect methods!');
 		} else {
 			this.onUrlConnect[url] = function(socket){
-				fun(socket);
-				//After user logic is executed ok socket is added
-				self._connectedClients[socket.key] = socket;
+				try {
+					fun(socket);
+					//After user logic is executed ok socket is added
+					self._connectedClients[socket.key] = socket;
+				} catch (err) {
+					console.trace(err);
+					return socket.error(
+						'Internal error: Contact developers',
+						[err.stack],
+						code.INTERNAL_SERVER_ERROR
+					);
+				}
+
 			} ;
 		}
 	}
