@@ -1,7 +1,7 @@
 "use strict";
 
 var should = require('chai').should();
-var WebsocketRest = require('../src');
+var WebsocketRest = require('../bin');
 
 var WebSocket = require('ws');
 var test = require('./modules/test');

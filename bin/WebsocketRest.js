@@ -1,6 +1,8 @@
 "use strict";
 var status = require('http-status-codes');
-var queryString = require('query-string');
+
+var addSocketResponse = require('./socket/response');
+var addSocketKeys = require('./socket/keys');
 
 class WebsocketRest {
     constructor(socket, apiVersion) {
@@ -15,46 +17,8 @@ class WebsocketRest {
     _addSocketFunctions(socket) {
         var self = this;
         //https://google-styleguide.googlecode.com/svn/trunk/jsoncstyleguide.xml
-        socket.data = function (data, code) {
-			code = code || 200;
-            this.send(JSON.stringify({
-                apiVersion: self.apiVersion,
-				method: this.REST.method,
-				module: this.REST.module,
-				code : code,
-                data: data
-            }));
-        };
-		socket.info = function (message, code) {
 
-			code = code || 200;
-			let res = JSON.stringify({
-				apiVersion: self.apiVersion,
-				method: this.REST.method,
-				module: this.REST.module,
-				code: code,
-				data: {
-					message: message
-				}
-			});
-			this.send(res);
-		};
-        socket.error = function (message,errors, code) {
 
-			code = code || 500;
-            let res = JSON.stringify({
-                apiVersion: self.apiVersion,
-				method: this.REST.method,
-				module: this.REST.module,
-				code: code,
-                error: {
-                    message: message,
-                    errors: errors
-                }
-            });
-            this.send(res);
-			this.close();
-        };
         return socket;
     }
 
@@ -73,32 +37,19 @@ class WebsocketRest {
 		this.onClose = func;
 	}
 
-	_addSocketKeys(socket){
-		//Todo...
-		socket.address = socket.upgradeReq.connection.remoteAddress;
-		socket.params = queryString.parse(queryString.extract( socket.upgradeReq.url) );
-		socket.headers = socket.upgradeReq.headers;
-		socket.connectedAt = new Date();
-		socket.REST = {
-			'method' : 'connect',
-			'module' : 'event'
-		};
-		return socket;
-	}
 
     init() {
         var self = this;
         this.socket.on('connection', function (socket) {
 
-			var socket = self._addSocketKeys(socket);
-				socket = self._addSocketFunctions(socket);
+	        addSocketResponse(socket,self.apiVersion);
+	        addSocketKeys(socket);
 
 			self.onConnect(socket);
 
 			socket.on('close',function(){
 				self.onClose(socket);
 			});
-
 
             socket.on('message', function (msg) {
                 var req = JSON.parse(msg || "{}");
