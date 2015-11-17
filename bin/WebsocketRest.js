@@ -9,10 +9,10 @@ class WebsocketRest {
 		this.socket = null;
 		this.apiVersion = null;
 		this.modules = {};
+		this.onUrlConnect = {};
+		this.onUrlClose = {};
 		this._connectedClients = {};
 
-		this.onClose = function(socket){};
-		this.onConnect = function(socket){};
 	}
 
     init(socket, apiVersion) {
@@ -35,19 +35,36 @@ class WebsocketRest {
         }
     }
 
-	setOnConnect(func){
+	registerOnConnectUrl(url,fun){
 		var self = this;
-		this.onConnect = function(socket){
-			func(socket);
-			//After user logic is executed ok socket is added
-			self._connectedClients[socket.key] = socket;
-		};
+		if(url in this.onUrlConnect){
+			throw new Error(url + ' is allready in registered connect methods!');
+		} else {
+			this.onUrlConnect[url] = function(socket){
+				try {
+					fun(socket);
+					//After user logic is executed ok socket is added
+					self._connectedClients[socket.key] = socket;
+				} catch (err) {
+					console.trace(err);
+					return socket.error(
+						'Internal error: Contact developers',
+						[err.stack],
+						code.INTERNAL_SERVER_ERROR
+					);
+				}
 
-	}
-	setOnClose(func){
-		this.onClose = func;
+			} ;
+		}
 	}
 
+	registerOnCloseUrl(url, fun) {
+		if (url in this.onUrlClose) {
+			throw new Error(url + ' is allready in registered connect methods!');
+		} else {
+			this.onUrlClose[url] = fun;
+		}
+	}
 
     initServer() {
         var self = this;
@@ -56,17 +73,15 @@ class WebsocketRest {
 	        addSocketResponse(socket,self.apiVersion);
 	        addSocketKeys(socket);
 
-			self.onConnect(socket);
+	        self.onUrlConnect[socket.urlPath](socket);
 
 			socket.on('close',function(){
 				delete self._connectedClients[socket.key];
-				self.onClose(socket);
+				self.onUrlClose[socket.urlPath](socket);
 			});
 
             socket.on('message', function (msg) {
                 var req = JSON.parse(msg || "{}");
-
-				console.error(msg);
 
 				//check req
                 var reqKeys = ['module', 'method'];

@@ -17,15 +17,15 @@ describe('WebsocketRest', function () {
 
         websocketRest.init(socketServer,'0.0.0');
         websocketRest.registerModule('test',test);
+	    websocketRest.registerOnConnectUrl('/api/test',function(socket){});
+	    websocketRest.registerOnCloseUrl('/api/test',function(socket){});
         websocketRest.initServer();
         done();
     });
 
     beforeEach(function (done) {
-		websocketRest.onClose(function(){});
-		websocketRest.setOnConnect(function(){});
 
-        socket = new WebSocket('http://localhost:9000?param0=param');
+        socket = new WebSocket('http://localhost:9000/api/test?param0=param');
 
         socket.on('open',function(){
             done();
@@ -154,11 +154,28 @@ describe('WebsocketRest', function () {
 			}));
 		});
 
-		it('should have returnParams', function (done) {
+		it('should have urlPath', function (done) {
+			socket.on('message', function (msg) {
+				msg.should.be.equal(JSON.stringify({
+					"apiVersion": "0.0.0",
+					'method': 'returnUrlPath',
+					'module': 'test',
+					code: 200,
+					"data": '/api/test'
+				}));
+				done();
+			});
+			socket.send(JSON.stringify({
+				module: 'test',
+				method: 'returnUrlPath'
+			}));
+		});
+
+		it('should have returnQuery', function (done) {
 			socket.on('message', function (msg) {
 				msg.should.be.equal(JSON.stringify({
 					"apiVersion" : "0.0.0",
-					'method': 'returnParams',
+					'method': 'returnQuery',
 					'module': 'test',
 					code: 200,
 					"data" : {
@@ -169,7 +186,7 @@ describe('WebsocketRest', function () {
 			});
 			socket.send(JSON.stringify({
 				'module': 'test',
-				'method': 'returnParams'
+				'method': 'returnQuery'
 			}));
 		});
 
