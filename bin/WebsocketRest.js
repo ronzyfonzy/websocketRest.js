@@ -21,7 +21,9 @@ class WebsocketRest {
     }
 
 	getConnectedClient(key){
-		return this._connectedClients[key];
+		if(key in this._connectedClients){
+			return this._connectedClients[key];
+		}
 	}
 	getConnectedClients(){
 		return this._connectedClients;
