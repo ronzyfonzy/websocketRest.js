@@ -74,7 +74,8 @@ class WebsocketRest {
 		if(urlPath in this.onUrlConnect){
 			this.onUrlConnect[urlPath](socket);
 		} else {
-			socket.close();
+			var err = `UrlPath: ${socket.urlPath}] not found !`;
+			socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
 		}
 	}
 
@@ -91,9 +92,6 @@ class WebsocketRest {
 				delete self._connectedClients[socket.key];
 				if (socket.urlPath in self.onUrlConnect) {
 					self.onUrlConnect[socket.urlPath](socket);
-				} else {
-					var err = `UrlPath: ${socket.urlPath}] not found !`;
-					socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
 				}
 			});
 
