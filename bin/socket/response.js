@@ -36,16 +36,18 @@
  */
 module.exports = function(socket,apiVersion,logger) {
 	socket.data = function (data, code) {
-		this.send(JSON.stringify({
+		let json = {
 			apiVersion: apiVersion,
 			method: this.REST.method,
 			module: this.REST.module,
 			code: code,
 			data: data
-		}));
+		};
+		logger.debug('websocket-rest (socket.data)',json);
+		this.send(JSON.stringify(json));
 	};
 	socket.info = function (message, code) {
-		this.send(JSON.stringify({
+		let json = {
 			apiVersion: apiVersion,
 			method: this.REST.method,
 			module: this.REST.module,
@@ -53,10 +55,21 @@ module.exports = function(socket,apiVersion,logger) {
 			data: {
 				message: message
 			}
-		}));
+		};
+		logger.debug('websocket-rest (socket.info)',json);
+		this.send(JSON.stringify(json));
 	};
 	socket.error = function (message, errors, code) {
-
+		let json = {
+			apiVersion: apiVersion,
+			method: this.REST.method,
+			module: this.REST.module,
+			code: code,
+			error: {
+				message: message,
+				errors: errors
+			}
+		};
 		logger.warn('websocket-rest (socket.error)',{
 			message : 'Socket server responde with error.',
 			socket : {
@@ -67,28 +80,10 @@ module.exports = function(socket,apiVersion,logger) {
 				key : socket.key,
 				connectedAt	: socket.connectedAt
 			},
-			response : {
-				apiVersion: apiVersion,
-				method: this.REST.method,
-				module: this.REST.module,
-				code: code,
-				error: {
-					message: message,
-					errors: errors
-				}
-			}
+			response : json
 		});
 
-		this.send(JSON.stringify({
-			apiVersion: apiVersion,
-			method: this.REST.method,
-			module: this.REST.module,
-			code: code,
-			error: {
-				message: message,
-				errors: errors
-			}
-		}));
+		this.send(JSON.stringify(json));
 		this.close();
 	};
 };
