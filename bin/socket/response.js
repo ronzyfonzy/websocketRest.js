@@ -58,6 +58,7 @@ module.exports = function(socket,apiVersion,logger) {
 	socket.error = function (message, errors, code) {
 
 		logger.warn('websocket-rest (socket.error)',{
+			message : 'Socket server responde with error.',
 			socket : {
 				address : socket.address,
 				query : socket.query,

@@ -117,7 +117,10 @@ class WebsocketRest {
 		var self = this;
 		if(url in this.onUrlConnect){
 			let error = `${url} is allready in onUrlConnect!`;
-			self._log.fatal('websocket-rest (registerOnConnectUrl) -> ',error);
+			self._log.fatal('websocket-rest (registerOnConnectUrl)',{
+				message : error,
+				url : url
+			});
 			throw new Error(error);
 		} else {
 			this.onUrlConnect[url] = function(socket){
@@ -126,7 +129,11 @@ class WebsocketRest {
 						self._connectedClients[socket.key] = socket;
 					});
 				} catch (err) {
-					self._log.err(`websocket-rest (onUrlConnect[${url}])->`,err.stack);
+					self._log.err(`websocket-rest (registerOnConnectUrl)`,{
+						message : 'this.onUrlConnect[url]',
+						url : url,
+						stack : err.stack
+					});
 				}
 			};
 		}
@@ -144,14 +151,21 @@ class WebsocketRest {
 		var self = this;
 		if (url in this.onUrlClose) {
 			let error = `${url} is allready in onUrlClose !`;
-			self._log.fatal('websocket-rest (registerOnCloseUrl) -> ', error);
+			self._log.fatal('websocket-rest (registerOnCloseUrl)',{
+				message : error,
+				url : url
+			});
 			throw new Error(error);
 		} else {
 			this.onUrlClose[url] = function(socket){
 				try {
 					fun(socket);
 				} catch (err) {
-					self._log.err(`websocket-rest (onUrlClose[${url}]) ->`,err.stack);
+					self._log.err(`websocket-rest (registerOnCloseUrl)`,{
+						message : 'this.onUrlConnect[url]',
+						url : url,
+						stack : err.stack
+					});
 				}
 			};
 		}
@@ -172,7 +186,6 @@ class WebsocketRest {
 			this.onUrlConnect[urlPath](socket);
 		} else {
 			var err = `UrlPath: ${socket.urlPath}] not found !`;
-			this._log.warn('websocket-rest (_onConnection) ->',`${socket.urlPath} called from client!`);
 			socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
 		}
 	}
@@ -218,12 +231,10 @@ class WebsocketRest {
                 }
                 if (keyError.length != 0) {
                     var err = `Keys: [${keyError}] not in request!`;
-	                self._log.warn(`websocket-rest (on-message) ->`, err);
                     socket.error(status.getStatusText(status.BAD_REQUEST),[err],status.BAD_REQUEST);
 
                 } else if(0 == req.method.indexOf("private")){
 					var err = `Method: [${req.method}] is private!`;
-	                self._log.warn(`websocket-rest (on-message) ->`, err);
 					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
 				} else {
 					socket.REST.module = req['module'];
@@ -235,7 +246,14 @@ class WebsocketRest {
 		                delete req['data'];
 	                }
 
-                    self.modules[req['module']][req['method']](req, socket);
+	                try{
+		                self.modules[req['module']][req['method']](req, socket);
+	                } catch (err){
+		                self._log.fatal('websocket-rest (on.message)',{
+			                message : 'Found new undiscowered error!',
+			                stack : err.stack
+		                })
+	                }
                 }
             });
         });
