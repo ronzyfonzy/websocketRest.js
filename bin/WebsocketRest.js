@@ -44,9 +44,9 @@ class WebsocketRest {
 		} else {
 			this.onUrlConnect[url] = function(socket){
 				try {
-					fun(socket);
-					//After user logic is executed ok socket is added
-					self._connectedClients[socket.key] = socket;
+					fun(socket,function(){
+						self._connectedClients[socket.key] = socket;
+					});
 				} catch (err) {
 					console.trace(err);
 					return socket.error(
