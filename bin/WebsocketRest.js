@@ -52,7 +52,7 @@ class WebsocketRest {
 					return socket.error(
 						'Internal error: Contact developers',
 						[err.stack],
-						code.INTERNAL_SERVER_ERROR
+						status.INTERNAL_SERVER_ERROR
 					);
 				}
 
