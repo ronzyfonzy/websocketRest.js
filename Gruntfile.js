@@ -23,7 +23,7 @@ module.exports = function (grunt) {
 
 	    jsdoc: {
 		    dist: {
-			    src: ['bin/WebsocketRest.js'],
+			    src: ['bin/index.js'],
 			    options: {
 				    destination: 'doc'
 			    }
