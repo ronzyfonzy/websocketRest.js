@@ -49,14 +49,8 @@ class WebsocketRest {
 					});
 				} catch (err) {
 					console.trace(err);
-					return socket.error(
-						'Internal error: Contact developers',
-						[err.stack],
-						status.INTERNAL_SERVER_ERROR
-					);
 				}
-
-			} ;
+			};
 		}
 	}
 
