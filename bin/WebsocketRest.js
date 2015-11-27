@@ -1,34 +1,87 @@
 "use strict";
 var status = require('http-status-codes');
-
 var addSocketResponse = require('./socket/response');
 var addSocketKeys = require('./socket/keys');
 
 class WebsocketRest {
 	constructor(){
+		/**
+		 * Websocket server instance.
+		 * @type {null}
+		 */
 		this.socket = null;
+
+		/**
+		 * Verzion of your app. This data will exist in all responses to clients.
+		 * @type {null}
+		 */
 		this.apiVersion = null;
+
+		/**
+		 * All registered modules.
+		 * @type {{}}
+		 */
 		this.modules = {};
+
+		/**
+		 * All on connect to url events.
+		 * @type {{}}
+		 */
 		this.onUrlConnect = {};
+
+		/**
+		 * All on close from url events.
+		 * @type {{}}
+		 */
 		this.onUrlClose = {};
+
+		/**
+		 * All connected clients.
+		 * @type {{}}
+		 * @private
+		 */
 		this._connectedClients = {};
 
 	}
 
+	/**
+	 * Init function where you set socket server and apiVersion for responses.
+	 *
+	 * @param socket
+	 * @param apiVersion
+	 */
     init(socket, apiVersion) {
         this.socket = socket;
         this.apiVersion = apiVersion;
     }
 
+	/**
+	 * Get connected socket with key.
+	 *
+	 * @param key
+	 * @returns {*}
+	 */
 	getConnectedClient(key){
 		if(key in this._connectedClients){
 			return this._connectedClients[key];
 		}
 	}
+
+	/**
+	 * Get all connected socket clients.
+	 *
+	 * @returns {{}|*}
+	 */
 	getConnectedClients(){
 		return this._connectedClients;
 	}
 
+	/**
+	 * Adding new module to this.module if not exists.
+	 *
+	 * @param moduleName
+	 * @param module
+	 */
     registerModule(moduleName, module) {
         if (moduleName in this.modules) {
             throw new Error(moduleName + ' is allready in registered modules!');
@@ -37,6 +90,14 @@ class WebsocketRest {
         }
     }
 
+	/**
+	 * Register fun. that will execute on connection event when
+	 * client want to connect to specific server url.
+	 * When callback function is called, the client is added to connected clients.
+	 *
+	 * @param url
+	 * @param fun
+	 */
 	registerOnConnectUrl(url,fun){
 		var self = this;
 		if(url in this.onUrlConnect){
@@ -54,6 +115,14 @@ class WebsocketRest {
 		}
 	}
 
+	/**
+	 * Register fun. that will execute on connection close request from client
+	 * or from server action. This will remove client from connected clients
+	 * and execute on close function for appropriate socket.urlPath.
+	 *
+	 * @param url
+	 * @param fun
+	 */
 	registerOnCloseUrl(url, fun) {
 		if (url in this.onUrlClose) {
 			throw new Error(url + ' is allready in registered connect methods!');
@@ -62,6 +131,14 @@ class WebsocketRest {
 		}
 	}
 
+	/**
+	 * On client connect this method will execute
+	 * registered function for socket client url.
+	 * If url not found it will close connection end report the error
+	 *
+	 * @param socket
+	 * @private
+	 */
 	_onConnection(socket){
 		let urlPath = socket.urlPath;
 
@@ -73,6 +150,19 @@ class WebsocketRest {
 		}
 	}
 
+	/**
+	 * This will add listeners and handlers when socket client will connect to registered url
+	 * 1. It will add socket response methods [ data, info, error ].
+	 * 2. It will add socket properties...
+	 * 3. It will execute on connect function for client url.
+	 * 4. It will register on close event which will remove client from connected clients and after
+	 * that execute registered on close function.
+	 * 5. It will register on message event which will parse client message to json,
+	 * check for module and method key in message,
+	 * check if client want to call private method,
+	 * form request structure,
+	 * and call requested method in module.
+	 */
     initServer() {
         var self = this;
         this.socket.on('connection', function (socket) {
@@ -83,6 +173,7 @@ class WebsocketRest {
 	        self._onConnection(socket);
 
 			socket.on('close',function(){
+				//Remove connected clients is here because self scopping.
 				delete self._connectedClients[socket.key];
 				if (socket.urlPath in self.onUrlClose) {
 					self.onUrlClose[socket.urlPath](socket);
@@ -124,4 +215,9 @@ class WebsocketRest {
     }
 }
 
+/**
+ * Module will export instance of WebsocketRest class.
+ *
+ * @type {WebsocketRest}
+ */
 module.exports = new WebsocketRest();
