@@ -19,6 +19,7 @@
 	});	
    	
 	websocketRest.init(webSocketServer, 0.0,1);
+	websocketRest.logger(<winston logger instance>);
 	websocketRest.registerModule('device',{
 		ping : function(req,socket){
 			socket.data('Pong',200);

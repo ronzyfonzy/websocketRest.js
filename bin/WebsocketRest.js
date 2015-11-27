@@ -1,4 +1,5 @@
 "use strict";
+
 var status = require('http-status-codes');
 var addSocketResponse = require('./socket/response');
 var addSocketKeys = require('./socket/keys');
@@ -42,6 +43,11 @@ class WebsocketRest {
 		 */
 		this._connectedClients = {};
 
+		/**
+		 * Winston logger instance
+		 * @type {null}
+		 */
+		this._log = null;
 	}
 
 	/**
@@ -54,6 +60,15 @@ class WebsocketRest {
         this.socket = socket;
         this.apiVersion = apiVersion;
     }
+
+	/**
+	 * Logger must have next methods.
+	 *
+	 * @param logger
+	 */
+	logger(logger){
+		this._log = logger;
+	}
 
 	/**
 	 * Get connected socket with key.
@@ -101,7 +116,9 @@ class WebsocketRest {
 	registerOnConnectUrl(url,fun){
 		var self = this;
 		if(url in this.onUrlConnect){
-			throw new Error(url + ' is allready in registered connect methods!');
+			let error = `${url} is allready in onUrlConnect!`;
+			self._log.fatal('websocket-rest (registerOnConnectUrl) -> ',error);
+			throw new Error(error);
 		} else {
 			this.onUrlConnect[url] = function(socket){
 				try {
@@ -109,7 +126,7 @@ class WebsocketRest {
 						self._connectedClients[socket.key] = socket;
 					});
 				} catch (err) {
-					console.trace(err);
+					self._log.err(`websocket-rest (onUrlConnect[${url}])->`,err.stack);
 				}
 			};
 		}
@@ -124,10 +141,19 @@ class WebsocketRest {
 	 * @param fun
 	 */
 	registerOnCloseUrl(url, fun) {
+		var self = this;
 		if (url in this.onUrlClose) {
-			throw new Error(url + ' is allready in registered connect methods!');
+			let error = `${url} is allready in onUrlClose !`;
+			self._log.fatal('websocket-rest (registerOnCloseUrl) -> ', error);
+			throw new Error(error);
 		} else {
-			this.onUrlClose[url] = fun;
+			this.onUrlClose[url] = function(socket){
+				try {
+					fun(socket);
+				} catch (err) {
+					self._log.err(`websocket-rest (onUrlClose[${url}]) ->`,err.stack);
+				}
+			};
 		}
 	}
 
@@ -146,6 +172,7 @@ class WebsocketRest {
 			this.onUrlConnect[urlPath](socket);
 		} else {
 			var err = `UrlPath: ${socket.urlPath}] not found !`;
+			this._log.warn('websocket-rest (_onConnection) ->',`${socket.urlPath} called from client!`);
 			socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
 		}
 	}
@@ -191,12 +218,12 @@ class WebsocketRest {
                 }
                 if (keyError.length != 0) {
                     var err = `Keys: [${keyError}] not in request!`;
-                    console.error(err);
+	                self._log.warn(`websocket-rest (on-message) ->`, err);
                     socket.error(status.getStatusText(status.BAD_REQUEST),[err],status.BAD_REQUEST);
 
                 } else if(0 == req.method.indexOf("private")){
-					var err = `You can not call private methods!`;
-					console.error(err);
+					var err = `Method: [${req.method}] is private!`;
+	                self._log.warn(`websocket-rest (on-message) ->`, err);
 					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
 				} else {
 					socket.REST.module = req['module'];
