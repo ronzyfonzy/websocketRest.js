@@ -84,8 +84,8 @@ class WebsocketRest {
 
 			socket.on('close',function(){
 				delete self._connectedClients[socket.key];
-				if (socket.urlPath in self.onUrlConnect) {
-					self.onUrlConnect[socket.urlPath](socket);
+				if (socket.urlPath in self.onUrlClose) {
+					self.onUrlClose[socket.urlPath](socket);
 				}
 			});
 
