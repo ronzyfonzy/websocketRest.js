@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: WebsocketRest.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: WebsocketRest.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+var status = require('http-status-codes');
+var addSocketResponse = require('./socket/response');
+var addSocketKeys = require('./socket/keys');
+
+class WebsocketRest {
+	constructor(){
+		/**
+		 * Websocket server instance.
+		 * @type {null}
+		 */
+		this.socket = null;
+
+		/**
+		 * Verzion of your app. This data will exist in all responses to clients.
+		 * @type {null}
+		 */
+		this.apiVersion = null;
+
+		/**
+		 * All registered modules.
+		 * @type {{}}
+		 */
+		this.modules = {};
+
+		/**
+		 * All on connect to url events.
+		 * @type {{}}
+		 */
+		this.onUrlConnect = {};
+
+		/**
+		 * All on close from url events.
+		 * @type {{}}
+		 */
+		this.onUrlClose = {};
+
+		/**
+		 * All connected clients.
+		 * @type {{}}
+		 * @private
+		 */
+		this._connectedClients = {};
+
+	}
+
+	/**
+	 * Init function where you set socket server and apiVersion for responses.
+	 *
+	 * @param socket
+	 * @param apiVersion
+	 */
+    init(socket, apiVersion) {
+        this.socket = socket;
+        this.apiVersion = apiVersion;
+    }
+
+	/**
+	 * Get connected socket with key.
+	 *
+	 * @param key
+	 * @returns {*}
+	 */
+	getConnectedClient(key){
+		if(key in this._connectedClients){
+			return this._connectedClients[key];
+		}
+	}
+
+	/**
+	 * Get all connected socket clients.
+	 *
+	 * @returns {{}|*}
+	 */
+	getConnectedClients(){
+		return this._connectedClients;
+	}
+
+	/**
+	 * Adding new module to this.module if not exists.
+	 *
+	 * @param moduleName
+	 * @param module
+	 */
+    registerModule(moduleName, module) {
+        if (moduleName in this.modules) {
+            throw new Error(moduleName + ' is allready in registered modules!');
+        } else {
+            this.modules[moduleName] = module;
+        }
+    }
+
+	/**
+	 * Register fun. that will execute on connection event when
+	 * client want to connect to specific server url.
+	 * When callback function is called, the client is added to connected clients.
+	 *
+	 * @param url
+	 * @param fun
+	 */
+	registerOnConnectUrl(url,fun){
+		var self = this;
+		if(url in this.onUrlConnect){
+			throw new Error(url + ' is allready in registered connect methods!');
+		} else {
+			this.onUrlConnect[url] = function(socket){
+				try {
+					fun(socket,function(){
+						self._connectedClients[socket.key] = socket;
+					});
+				} catch (err) {
+					console.trace(err);
+				}
+			};
+		}
+	}
+
+	/**
+	 * Register fun. that will execute on connection close request from client
+	 * or from server action. This will remove client from connected clients
+	 * and execute on close function for appropriate socket.urlPath.
+	 *
+	 * @param url
+	 * @param fun
+	 */
+	registerOnCloseUrl(url, fun) {
+		if (url in this.onUrlClose) {
+			throw new Error(url + ' is allready in registered connect methods!');
+		} else {
+			this.onUrlClose[url] = fun;
+		}
+	}
+
+	/**
+	 * On client connect this method will execute
+	 * registered function for socket client url.
+	 * If url not found it will close connection end report the error
+	 *
+	 * @param socket
+	 * @private
+	 */
+	_onConnection(socket){
+		let urlPath = socket.urlPath;
+
+		if(urlPath in this.onUrlConnect){
+			this.onUrlConnect[urlPath](socket);
+		} else {
+			var err = `UrlPath: ${socket.urlPath}] not found !`;
+			socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
+		}
+	}
+
+	/**
+	 * This will add listeners and handlers when socket client will connect to registered url
+	 * 1. It will add socket response methods [ data, info, error ].
+	 * 2. It will add socket properties...
+	 * 3. It will execute on connect function for client url.
+	 * 4. It will register on close event which will remove client from connected clients and after
+	 * that execute registered on close function.
+	 * 5. It will register on message event which will parse client message to json,
+	 * check for module and method key in message,
+	 * check if client want to call private method,
+	 * form request structure,
+	 * and call requested method in module.
+	 */
+    initServer() {
+        var self = this;
+        this.socket.on('connection', function (socket) {
+
+	        addSocketResponse(socket,self.apiVersion);
+	        addSocketKeys(socket);
+
+	        self._onConnection(socket);
+
+			socket.on('close',function(){
+				//Remove connected clients is here because self scopping.
+				delete self._connectedClients[socket.key];
+				if (socket.urlPath in self.onUrlClose) {
+					self.onUrlClose[socket.urlPath](socket);
+				}
+			});
+
+            socket.on('message', function (msg) {
+                var req = JSON.parse(msg || "{}");
+
+				//check req
+                var reqKeys = ['module', 'method'];
+                var keyError = [];
+                for (var i in reqKeys) {
+                    if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
+                }
+                if (keyError.length != 0) {
+                    var err = `Keys: [${keyError}] not in request!`;
+                    console.error(err);
+                    socket.error(status.getStatusText(status.BAD_REQUEST),[err],status.BAD_REQUEST);
+
+                } else if(0 == req.method.indexOf("private")){
+					var err = `You can not call private methods!`;
+					console.error(err);
+					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
+				} else {
+					socket.REST.module = req['module'];
+					socket.REST.method = req['method'];
+
+	                //For standardization with express...
+	                if (req.hasOwnProperty('data')) {
+		                req['body'] = req['data'];
+		                delete req['data'];
+	                }
+
+                    self.modules[req['module']][req['method']](req, socket);
+                }
+            });
+        });
+    }
+}
+
+/**
+ * Module will export instance of WebsocketRest class.
+ *
+ * @type {WebsocketRest}
+ */
+module.exports = new WebsocketRest();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Nov 27 2015 12:00:24 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
