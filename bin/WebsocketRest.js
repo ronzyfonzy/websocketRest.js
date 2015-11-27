@@ -92,7 +92,7 @@ class WebsocketRest {
 				if (socket.urlPath in self.onUrlConnect) {
 					self.onUrlConnect[socket.urlPath](socket);
 				} else {
-					var err = `UrlPath: ${urlPath}] not found !`;
+					var err = `UrlPath: ${socket.urlPath}] not found !`;
 					socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
 				}
 			});
