@@ -194,7 +194,7 @@ class WebsocketRest {
         var self = this;
         this.socket.on('connection', function (socket) {
 
-	        addSocketResponse(socket,self.apiVersion);
+	        addSocketResponse(socket,self.apiVersion,logger);
 	        addSocketKeys(socket);
 
 	        self._onConnection(socket);

@@ -34,7 +34,7 @@
  * @param socket
  * @param apiVersion
  */
-module.exports = function(socket,apiVersion) {
+module.exports = function(socket,apiVersion,logger) {
 	socket.data = function (data, code) {
 		this.send(JSON.stringify({
 			apiVersion: apiVersion,
@@ -56,6 +56,28 @@ module.exports = function(socket,apiVersion) {
 		}));
 	};
 	socket.error = function (message, errors, code) {
+
+		logger.warn('websocket-rest (socket.error)',{
+			socket : {
+				address : socket.address,
+				query : socket.query,
+				urlPath : socket.urlPath,
+				headers : socket.headers,
+				key : socket.key,
+				connectedAt	: socket.connectedAt
+			},
+			response : {
+				apiVersion: apiVersion,
+				method: this.REST.method,
+				module: this.REST.module,
+				code: code,
+				error: {
+					message: message,
+					errors: errors
+				}
+			}
+		});
+
 		this.send(JSON.stringify({
 			apiVersion: apiVersion,
 			method: this.REST.method,
