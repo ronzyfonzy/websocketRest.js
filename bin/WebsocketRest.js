@@ -243,7 +243,13 @@ class WebsocketRest {
 			});
 
             socket.on('message', function (msg) {
-                var req = JSON.parse(msg || "{}");
+	            try{
+		            var req = JSON.parse(msg);
+		            if(!req) throw new Error('Request is not defined!');
+	            } catch (err){
+		            var err = `Request: [${msg}] could not be parsed!`;
+		            return socket.error(status.getStatusText(status.BAD_REQUEST),[err],483);
+	            }
 
 				//check req
                 var reqKeys = ['module', 'method','data'];
