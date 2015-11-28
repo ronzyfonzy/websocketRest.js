@@ -208,7 +208,7 @@ class WebsocketRest {
 			this.onUrlConnect[urlPath](socket);
 		} else {
 			var err = `UrlPath: ${socket.urlPath}] not found !`;
-			socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
+			socket.error(status.getStatusText(status.NOT_FOUND), [err], 480);
 		}
 	}
 
@@ -253,11 +253,11 @@ class WebsocketRest {
                 }
                 if (keyError.length != 0) {
                     var err = `Keys: [${keyError}] not in request!`;
-                    socket.error(status.getStatusText(status.BAD_REQUEST),[err],status.BAD_REQUEST);
+                    socket.error(status.getStatusText(status.BAD_REQUEST),[err],481);
 
                 } else if(0 == req.method.indexOf("private")){
 					var err = `Method: [${req.method}] is private!`;
-					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
+					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],482);
                 } else {
 					socket.REST.module = req['module'];
 					socket.REST.method = req['method'];
