@@ -246,7 +246,7 @@ class WebsocketRest {
                 var req = JSON.parse(msg || "{}");
 
 				//check req
-                var reqKeys = ['module', 'method'];
+                var reqKeys = ['module', 'method','data'];
                 var keyError = [];
                 for (var i in reqKeys) {
                     if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
@@ -258,7 +258,7 @@ class WebsocketRest {
                 } else if(0 == req.method.indexOf("private")){
 					var err = `Method: [${req.method}] is private!`;
 					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
-				} else {
+                } else {
 					socket.REST.module = req['module'];
 					socket.REST.method = req['method'];
 
