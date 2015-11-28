@@ -127,6 +127,17 @@ class WebsocketRest {
 				try {
 					fun(socket,function(){
 						self._connectedClients[socket.key] = socket;
+						self._log.info('websocket-rest (socket.connection)',{
+							message: 'Client has connected',
+							socket: {
+								address: socket.address,
+								query: socket.query,
+								urlPath: socket.urlPath,
+								headers: socket.headers,
+								key: socket.key,
+								connectedAt: socket.connectedAt
+							}
+						});
 					});
 				} catch (err) {
 					self._log.err(`websocket-rest (registerOnConnectUrl)`,{
@@ -159,6 +170,17 @@ class WebsocketRest {
 		} else {
 			this.onUrlClose[url] = function(socket){
 				try {
+					self._log.info('websocket-rest (socket.close)', {
+						message: 'Client has disconnected',
+						socket: {
+							address: socket.address,
+							query: socket.query,
+							urlPath: socket.urlPath,
+							headers: socket.headers,
+							key: socket.key,
+							connectedAt: socket.connectedAt
+						}
+					});
 					fun(socket);
 				} catch (err) {
 					self._log.err(`websocket-rest (registerOnCloseUrl)`,{
