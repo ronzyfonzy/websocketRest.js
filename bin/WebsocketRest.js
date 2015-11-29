@@ -232,7 +232,7 @@ class WebsocketRest {
 
 	        addSocketResponse(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
-	        
+
 	        if(false === self._onConnection(socket)) return;
 
 			socket.on('close',function(){
@@ -271,6 +271,8 @@ class WebsocketRest {
 
 					} else if(0 == req.method.indexOf("private")){
 						var err = `Method: [${req.method}] is private!`;
+						socket.REST.module = req['module'];
+						socket.REST.method = req['method'];
 						socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],482);
 					} else {
 						socket.REST.module = req['module'];
