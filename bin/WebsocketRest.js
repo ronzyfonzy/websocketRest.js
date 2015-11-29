@@ -260,7 +260,7 @@ class WebsocketRest {
 					}
 
 					//check req
-					var reqKeys = ['module', 'method','data'];
+					var reqKeys = ['module', 'method'];
 					var keyError = [];
 					for (var i in reqKeys) {
 						if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
@@ -280,7 +280,7 @@ class WebsocketRest {
 
 						//For standardization with express...
 						if (req.hasOwnProperty('data')) {
-							req['body'] = req['data'];
+							req['body'] = req['data'] || {};
 							delete req['data'];
 						}
 
