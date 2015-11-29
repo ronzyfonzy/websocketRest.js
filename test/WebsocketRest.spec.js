@@ -17,7 +17,7 @@ describe('WebsocketRest', function () {
 
         websocketRest.init(socketServer,'0.0.0');
         websocketRest.registerModule('test',test);
-	    websocketRest.registerOnConnectUrl('/api/test',function(socket){});
+	    websocketRest.registerOnConnectUrl('/api/test',function(socket,success){success()});
 	    websocketRest.registerOnCloseUrl('/api/test',function(socket){});
         websocketRest.initServer();
         done();

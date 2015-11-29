@@ -7,11 +7,7 @@ module.exports = function (grunt) {
     // Time how long tasks take. Can help when optimizing build times
     require('time-grunt')(grunt);
 
-    // Add the grunt-mocha-test tasks.
-    grunt.loadNpmTasks('grunt-mocha-test');
-
     grunt.initConfig({
-        // Configure a mochaTest task
         mochaTest: {
             test: {
                 options: {
@@ -24,6 +20,15 @@ module.exports = function (grunt) {
         clean: {
             lib: './lib/*'
         },
+
+	    jsdoc: {
+		    dist: {
+			    src: ['bin/index.js'],
+			    options: {
+				    destination: 'doc'
+			    }
+		    }
+	    },
 
         babel: {
             options: {
