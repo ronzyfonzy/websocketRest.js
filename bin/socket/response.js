@@ -44,7 +44,16 @@ module.exports = function(socket,apiVersion,logger) {
 			data: data
 		};
 		logger.debug('websocket-rest (socket.data)',json);
-		this.send(JSON.stringify(json));
+		try{
+			this.send(JSON.stringify(json));
+		} catch (err){
+			logger.debug('websocket-rest (socket.send)',{
+				message : 'Could not send to client',
+				json : json,
+				method : 'data',
+				stack : err
+			})
+		}
 	};
 	socket.info = function (message, code) {
 		let json = {
@@ -57,7 +66,16 @@ module.exports = function(socket,apiVersion,logger) {
 			}
 		};
 		logger.debug('websocket-rest (socket.info)',json);
-		this.send(JSON.stringify(json));
+		try{
+			this.send(JSON.stringify(json));
+		} catch (err){
+			logger.debug('websocket-rest (socket.send)',{
+				message : 'Could not send to client',
+				json : json,
+				method : 'debug',
+				stack : err
+			})
+		}
 	};
 	socket.error = function (message, errors, code) {
 		let json = {
@@ -83,7 +101,16 @@ module.exports = function(socket,apiVersion,logger) {
 			response : json
 		});
 
-		this.send(JSON.stringify(json));
-		this.close();
+		try{
+			this.send(JSON.stringify(json));
+			this.close();
+		} catch (err){
+			logger.debug('websocket-rest (socket.send)',{
+				message : 'Could not send & close client',
+				method : 'error',
+				json : json,
+				stack : err
+			})
+		}
 	};
 };
