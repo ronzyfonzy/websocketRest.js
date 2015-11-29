@@ -235,54 +235,68 @@ class WebsocketRest {
 	        self._onConnection(socket);
 
 			socket.on('close',function(){
-				//Remove connected clients is here because self scopping.
-				delete self._connectedClients[socket.key];
-				if (socket.urlPath in self.onUrlClose) {
-					self.onUrlClose[socket.urlPath](socket);
+				try{
+					//Remove connected clients is here because self scopping.
+					delete self._connectedClients[socket.key];
+					if (socket.urlPath in self.onUrlClose) {
+						self.onUrlClose[socket.urlPath](socket);
+					}
+				} catch(err){
+					self._log.err(`websocket-rest (socket.onClose)`,{
+						message : 'Unknown error on socket close.',
+						stack : err.stack
+					});
 				}
 			});
 
             socket.on('message', function (msg) {
 	            try{
-		            var req = JSON.parse(msg);
-		            if(!req) throw new Error('Request is not defined!');
+					try{
+						var req = JSON.parse(msg);
+						if(!req) throw new Error('Request is not defined!');
+					} catch (err){
+						var err = `Request: [${msg}] could not be parsed!`;
+						return socket.error(status.getStatusText(status.BAD_REQUEST),[err],483);
+					}
+
+					//check req
+					var reqKeys = ['module', 'method','data'];
+					var keyError = [];
+					for (var i in reqKeys) {
+						if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
+					}
+					if (keyError.length != 0) {
+						var err = `Keys: [${keyError}] not in request!`;
+						socket.error(status.getStatusText(status.BAD_REQUEST),[err],481);
+
+					} else if(0 == req.method.indexOf("private")){
+						var err = `Method: [${req.method}] is private!`;
+						socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],482);
+					} else {
+						socket.REST.module = req['module'];
+						socket.REST.method = req['method'];
+
+						//For standardization with express...
+						if (req.hasOwnProperty('data')) {
+							req['body'] = req['data'];
+							delete req['data'];
+						}
+
+						try{
+							self.modules[req['module']][req['method']](req, socket);
+						} catch (err){
+							self._log.fatal('websocket-rest (on.message)',{
+								message : 'Found new undiscowered error!',
+								stack : err.stack
+							})
+						}
+					}
 	            } catch (err){
-		            var err = `Request: [${msg}] could not be parsed!`;
-		            return socket.error(status.getStatusText(status.BAD_REQUEST),[err],483);
+		            self._log.err(`websocket-rest (socket.onMessage)`, {
+			            message : 'Unknown error on socket message.',
+						stack : err.stack
+		            });
 	            }
-
-				//check req
-                var reqKeys = ['module', 'method','data'];
-                var keyError = [];
-                for (var i in reqKeys) {
-                    if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
-                }
-                if (keyError.length != 0) {
-                    var err = `Keys: [${keyError}] not in request!`;
-                    socket.error(status.getStatusText(status.BAD_REQUEST),[err],481);
-
-                } else if(0 == req.method.indexOf("private")){
-					var err = `Method: [${req.method}] is private!`;
-					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],482);
-                } else {
-					socket.REST.module = req['module'];
-					socket.REST.method = req['method'];
-
-	                //For standardization with express...
-	                if (req.hasOwnProperty('data')) {
-		                req['body'] = req['data'];
-		                delete req['data'];
-	                }
-
-	                try{
-		                self.modules[req['module']][req['method']](req, socket);
-	                } catch (err){
-		                self._log.fatal('websocket-rest (on.message)',{
-			                message : 'Found new undiscowered error!',
-			                stack : err.stack
-		                })
-	                }
-                }
             });
         });
     }
