@@ -251,12 +251,11 @@ class WebsocketRest {
 
             socket.on('message', function (msg) {
 	            try{
+
 					try{
-						var req = JSON.parse(msg);
-						if(!req) throw new Error('Request is not defined!');
+						var req = JSON.parse(msg) || {};
 					} catch (err){
-						var err = `Request: [${msg}] could not be parsed!`;
-						return socket.error(status.getStatusText(status.BAD_REQUEST),[err],483);
+						var req = {};
 					}
 
 					//check req
