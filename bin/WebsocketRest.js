@@ -209,6 +209,7 @@ class WebsocketRest {
 		} else {
 			var err = `UrlPath: ${socket.urlPath}] not found !`;
 			socket.error(status.getStatusText(status.NOT_FOUND), [err], 480);
+			return false;
 		}
 	}
 
@@ -231,8 +232,8 @@ class WebsocketRest {
 
 	        addSocketResponse(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
-
-	        self._onConnection(socket);
+	        
+	        if(false === self._onConnection(socket)) return;
 
 			socket.on('close',function(){
 				try{
