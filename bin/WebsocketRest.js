@@ -240,10 +240,13 @@ class WebsocketRest {
 					socket.REST.module = req['module'];
 					socket.REST.method = req['method'];
 
+
 	                //For standardization with express...
-	                if (req.hasOwnProperty('data')) {
-		                req['body'] = req['data'];
-		                delete req['data'];
+	                if(!req.data){
+		                req.body = {};
+	                } else {
+		                req.body = req.data;
+		                delete req.data;
 	                }
 
 	                try{
