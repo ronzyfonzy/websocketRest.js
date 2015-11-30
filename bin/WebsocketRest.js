@@ -41,7 +41,7 @@ class WebsocketRest {
 		 * @type {{}}
 		 * @private
 		 */
-		WebsocketRest.prototype._connectedClients = {};
+		this._connectedClients = {};
 
 		/**
 		 * Winston logger instance
@@ -77,8 +77,8 @@ class WebsocketRest {
 	 * @returns {*}
 	 */
 	getConnectedClient(key){
-		if(key in WebsocketRest._connectedClients){
-			return WebsocketRest._connectedClients[key];
+		if(key in this._connectedClients){
+			return this._connectedClients[key];
 		}
 	}
 
@@ -88,7 +88,7 @@ class WebsocketRest {
 	 * @returns {{}|*}
 	 */
 	getConnectedClients(){
-		return WebsocketRest._connectedClients;
+		return this._connectedClients;
 	}
 
 	/**
@@ -126,7 +126,7 @@ class WebsocketRest {
 			this.onUrlConnect[url] = function(socket){
 				try {
 					fun(socket,function(){
-						WebsocketRest._connectedClients[socket.key] = socket;
+						self._connectedClients[socket.key] = socket;
 						self._log.info('websocket-rest (socket.connection)',{
 							message: 'Client has connected',
 							socket: {
@@ -238,7 +238,7 @@ class WebsocketRest {
 			socket.on('close',function(){
 				try{
 					//Remove connected clients is here because self scopping.
-					delete WebsocketRest._connectedClients[socket.key];
+					delete self._connectedClients[socket.key];
 					if (socket.urlPath in self.onUrlClose) {
 						self.onUrlClose[socket.urlPath](socket);
 					}
@@ -315,4 +315,7 @@ class WebsocketRest {
  *
  * @type {WebsocketRest}
  */
+
+WebsocketRest.prototype._connectedClients = {};
+
 module.exports = new WebsocketRest();
