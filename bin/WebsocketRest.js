@@ -127,6 +127,17 @@ class WebsocketRest {
 				try {
 					fun(socket,function(){
 						self._connectedClients[socket.key] = socket;
+						self._log.info('websocket-rest (socket.connection)',{
+							message: 'Client has connected',
+							socket: {
+								address: socket.address,
+								query: socket.query,
+								urlPath: socket.urlPath,
+								headers: socket.headers,
+								key: socket.key,
+								connectedAt: socket.connectedAt
+							}
+						});
 					});
 				} catch (err) {
 					self._log.err(`websocket-rest (registerOnConnectUrl)`,{
@@ -159,6 +170,17 @@ class WebsocketRest {
 		} else {
 			this.onUrlClose[url] = function(socket){
 				try {
+					self._log.info('websocket-rest (socket.close)', {
+						message: 'Client has disconnected',
+						socket: {
+							address: socket.address,
+							query: socket.query,
+							urlPath: socket.urlPath,
+							headers: socket.headers,
+							key: socket.key,
+							connectedAt: socket.connectedAt
+						}
+					});
 					fun(socket);
 				} catch (err) {
 					self._log.err(`websocket-rest (registerOnCloseUrl)`,{
@@ -186,7 +208,8 @@ class WebsocketRest {
 			this.onUrlConnect[urlPath](socket);
 		} else {
 			var err = `UrlPath: ${socket.urlPath}] not found !`;
-			socket.error(status.getStatusText(status.NOT_FOUND), [err], status.NOT_FOUND);
+			socket.error(status.getStatusText(status.NOT_FOUND), [err], 480);
+			return false;
 		}
 	}
 
@@ -210,54 +233,78 @@ class WebsocketRest {
 	        addSocketResponse(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
 
-	        self._onConnection(socket);
+	        if(false === self._onConnection(socket)) return;
 
 			socket.on('close',function(){
-				//Remove connected clients is here because self scopping.
-				delete self._connectedClients[socket.key];
-				if (socket.urlPath in self.onUrlClose) {
-					self.onUrlClose[socket.urlPath](socket);
+				try{
+					//Remove connected clients is here because self scopping.
+					delete self._connectedClients[socket.key];
+					if (socket.urlPath in self.onUrlClose) {
+						self.onUrlClose[socket.urlPath](socket);
+					}
+				} catch(err){
+					self._log.err(`websocket-rest (socket.onClose)`,{
+						message : 'Unknown error on socket close.',
+						stack : err.stack
+					});
 				}
 			});
 
             socket.on('message', function (msg) {
-                var req = JSON.parse(msg || "{}");
+	            try{
 
-				//check req
-                var reqKeys = ['module', 'method'];
-                var keyError = [];
-                for (var i in reqKeys) {
-                    if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
-                }
-                if (keyError.length != 0) {
-                    var err = `Keys: [${keyError}] not in request!`;
-                    socket.error(status.getStatusText(status.BAD_REQUEST),[err],status.BAD_REQUEST);
+					try{
+						var req = JSON.parse(msg) || {};
+					} catch (err){
+						self._log.err(`websocket-rest (socket.onMessage)`, {
+							message : 'Error while parsing socket message json structure',
+							clientMsg : msg,
+							stack : err.stack
+						});
+						var req = {};
+					}
 
-                } else if(0 == req.method.indexOf("private")){
-					var err = `Method: [${req.method}] is private!`;
-					socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],status.METHOD_NOT_ALLOWED);
-				} else {
-					socket.REST.module = req['module'];
-					socket.REST.method = req['method'];
+					//check req
+					var reqKeys = ['module', 'method'];
+					var keyError = [];
+					for (var i in reqKeys) {
+						if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
+					}
+					if (keyError.length != 0) {
+						var err = `Keys: [${keyError}] not in request!`;
+						socket.error(status.getStatusText(status.BAD_REQUEST),[err],481);
 
+					} else if(0 == req.method.indexOf("private")){
+						var err = `Method: [${req.method}] is private!`;
+						socket.REST.module = req['module'];
+						socket.REST.method = req['method'];
+						socket.error(status.getStatusText(status.METHOD_NOT_ALLOWED),[err],482);
+					} else {
+						socket.REST.module = req['module'];
+						socket.REST.method = req['method'];
 
-	                //For standardization with express...
-	                if(!req.data){
-		                req.body = {};
-	                } else {
-		                req.body = req.data;
-		                delete req.data;
-	                }
+						if(!req.data){
+							req.body = {};
+						} else {
+							req.body = req.data;
+							delete req.data;
+						}
 
-	                try{
-		                self.modules[req['module']][req['method']](req, socket);
-	                } catch (err){
-		                self._log.fatal('websocket-rest (on.message)',{
-			                message : 'Found new undiscowered error!',
-			                stack : err.stack
-		                })
-	                }
-                }
+						try{
+							self.modules[req['module']][req['method']](req, socket);
+						} catch (err){
+							self._log.fatal('websocket-rest (socket.onMessage)',{
+								message : 'Found new undiscowered error!',
+								stack : err.stack
+							})
+						}
+					}
+	            } catch (err){
+		            self._log.err(`websocket-rest (socket.onMessage)`, {
+			            message : 'Unknown error on socket message.',
+						stack : err.stack
+		            });
+	            }
             });
         });
     }
