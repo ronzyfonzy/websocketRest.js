@@ -315,7 +315,4 @@ class WebsocketRest {
  *
  * @type {WebsocketRest}
  */
-
-WebsocketRest.prototype._connectedClients = {};
-
 module.exports = new WebsocketRest();
