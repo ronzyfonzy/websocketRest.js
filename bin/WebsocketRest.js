@@ -256,11 +256,16 @@ class WebsocketRest {
 					try{
 						var req = JSON.parse(msg) || {};
 					} catch (err){
+						self._log.err(`websocket-rest (socket.onMessage)`, {
+							message : 'Error while parsing socket message json structure',
+							clientMsg : msg,
+							stack : err.stack
+						});
 						var req = {};
 					}
 
 					//check req
-					var reqKeys = ['module', 'method','data'];
+					var reqKeys = ['module', 'method'];
 					var keyError = [];
 					for (var i in reqKeys) {
 						if (!(reqKeys[i] in req)) keyError.push(reqKeys[i]);
@@ -278,16 +283,17 @@ class WebsocketRest {
 						socket.REST.module = req['module'];
 						socket.REST.method = req['method'];
 
-						//For standardization with express...
-						if (req.hasOwnProperty('data')) {
-							req['body'] = req['data'];
-							delete req['data'];
+						if(!req.data){
+							req.body = {};
+						} else {
+							req.body = req.data;
+							delete req.data;
 						}
 
 						try{
 							self.modules[req['module']][req['method']](req, socket);
 						} catch (err){
-							self._log.fatal('websocket-rest (on.message)',{
+							self._log.fatal('websocket-rest (socket.onMessage)',{
 								message : 'Found new undiscowered error!',
 								stack : err.stack
 							})
