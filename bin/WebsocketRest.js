@@ -2,6 +2,7 @@
 
 var status = require('http-status-codes');
 var addSocketResponse = require('./socket/response');
+var addSocketRequest = require('./socket/request');
 var addSocketKeys = require('./socket/keys');
 
 class WebsocketRest {
@@ -231,6 +232,7 @@ class WebsocketRest {
         this.socket.on('connection', function (socket) {
 
 	        addSocketResponse(socket,self.apiVersion,self._log);
+	        addSocketRequest(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
 
 	        if(false === self._onConnection(socket)) return;
