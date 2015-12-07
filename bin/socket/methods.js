@@ -14,7 +14,7 @@ var Vjson = require('jsonschema').Validator;
  *
  * @param socket
  */
-module.exports = function (socket, apiVersion, logger) {
+module.exports = function (socket, apiVersion, log) {
 
 	socket.validate = function (name, type, properties) {
 		var vjson = new Vjson();
