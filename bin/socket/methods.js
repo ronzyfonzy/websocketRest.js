@@ -32,7 +32,7 @@ module.exports = function (socket, apiVersion, log) {
 			};
 
 			log.info(`websocket-rest (socket.validate.${name})`,'fail',error);
-			res.validationError(error);
+			socket.validationError(error);
 			return false;
 		} else {
 			log.info(`websocket-rest (socket.validate.${name})`,'pass');
