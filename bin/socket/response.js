@@ -40,7 +40,7 @@ module.exports = function(socket,apiVersion,logger) {
 			apiVersion: apiVersion,
 			method: this.REST.method,
 			module: this.REST.module,
-			code: code,
+			code: 400,
 			error: error
 		};
 		logger.debug('websocket-rest (socket.validationError)',json);
