@@ -2,7 +2,9 @@
 
 var status = require('http-status-codes');
 var addSocketResponse = require('./socket/response');
+var addSocketRequest = require('./socket/request');
 var addSocketKeys = require('./socket/keys');
+var addSocketMethods = require('./socket/methods');
 
 class WebsocketRest {
 	constructor(){
@@ -231,14 +233,22 @@ class WebsocketRest {
         this.socket.on('connection', function (socket) {
 
 	        addSocketResponse(socket,self.apiVersion,self._log);
+	        addSocketRequest(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
+	        addSocketMethods(socket,self.apiVersion,self._log);
 
 	        if(false === self._onConnection(socket)) return;
 
 			socket.on('close',function(){
 				try{
 					//Remove connected clients is here because self scopping.
-					delete self._connectedClients[socket.key];
+					if(socket.key in self._connectedClients){
+						delete self._connectedClients[socket.key];
+					} else {
+						self._log.warn('websocket-rest (socket.onClose)',{
+							message : 'Socket closed but not founded in connectedClients'
+						});
+					}
 					if (socket.urlPath in self.onUrlClose) {
 						self.onUrlClose[socket.urlPath](socket);
 					}
