@@ -234,6 +234,7 @@ class WebsocketRest {
 	        addSocketResponse(socket,self.apiVersion,self._log);
 	        addSocketRequest(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
+	        addSocketMethods(socket,self,apiVersion,self._log);
 
 	        if(false === self._onConnection(socket)) return;
 
