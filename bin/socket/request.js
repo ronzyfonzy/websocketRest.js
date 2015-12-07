@@ -1,4 +1,3 @@
-var Test = require('request-validator');
 
 module.exports = function (socket, apiVersion, logger) {
 
