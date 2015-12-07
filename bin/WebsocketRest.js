@@ -4,6 +4,7 @@ var status = require('http-status-codes');
 var addSocketResponse = require('./socket/response');
 var addSocketRequest = require('./socket/request');
 var addSocketKeys = require('./socket/keys');
+var addSocketMethods = require('./socket/methods');
 
 class WebsocketRest {
 	constructor(){
