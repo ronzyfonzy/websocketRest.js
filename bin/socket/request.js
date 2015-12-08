@@ -2,6 +2,8 @@
 
 module.exports = function (req) {
 
+	req.isValidated = true;
+
 	req.validate = function (name, type, properties) {
 		var vjson = new Vjson();
 
@@ -19,10 +21,9 @@ module.exports = function (req) {
 
 			log.info(`websocket-rest (socket.validate.${name})`,'fail',error);
 			socket.validationError(error);
-			return false;
+			this.isValidated = false;
 		} else {
 			log.info(`websocket-rest (socket.validate.${name})`,'pass');
-			return true;
 		}
 	};
 };
