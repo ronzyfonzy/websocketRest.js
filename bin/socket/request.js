@@ -1,4 +1,5 @@
-'use strict';
+"use strict";
+var Vjson = require('jsonschema').Validator;
 
 module.exports = function (req) {
 
