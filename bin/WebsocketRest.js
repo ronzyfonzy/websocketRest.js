@@ -2,7 +2,7 @@
 
 var status = require('http-status-codes');
 var addSocketResponse = require('./socket/response');
-var addSocketRequest = require('./socket/request');
+var addRequestMethods = require('./socket/request');
 var addSocketKeys = require('./socket/keys');
 var addSocketMethods = require('./socket/methods');
 
@@ -233,7 +233,6 @@ class WebsocketRest {
         this.socket.on('connection', function (socket) {
 
 	        addSocketResponse(socket,self.apiVersion,self._log);
-	        addSocketRequest(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
 	        addSocketMethods(socket,self.apiVersion,self._log);
 
@@ -299,6 +298,8 @@ class WebsocketRest {
 							req.body = req.data;
 							delete req.data;
 						}
+
+						addRequestMethods(req);
 
 						try{
 							self.modules[req['module']][req['method']](req, socket);

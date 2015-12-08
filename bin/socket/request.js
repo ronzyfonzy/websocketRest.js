@@ -1,25 +1,27 @@
 
-module.exports = function (socket, apiVersion, logger) {
+module.exports = function (req) {
 
-	socket.validationError = function (error) {
-		let json = {
-			apiVersion: apiVersion,
-			method: this.REST.method,
-			module: this.REST.module,
-			code: 400,
-			error: error
-		};
-		logger.debug('websocket-rest (socket.validationError)', json);
-		try {
-			this.send(JSON.stringify(json));
-		} catch (err) {
-			logger.debug('websocket-rest (socket.send)', {
-				message: 'Could not send to client',
-				json: json,
-				method: 'data',
-				stack: err
-			})
+	req.validate = function (name, type, properties) {
+		var vjson = new Vjson();
+
+		let report = vjson.validate(this[name], {
+			type,
+			properties
+		});
+
+		if (report.errors.length > 0) {
+
+			let error = {
+				message: `socket.${name} fail on schema validation.`,
+				report: report
+			};
+
+			log.info(`websocket-rest (socket.validate.${name})`,'fail',error);
+			socket.validationError(error);
+			return false;
+		} else {
+			log.info(`websocket-rest (socket.validate.${name})`,'pass');
+			return true;
 		}
 	};
-
 };
