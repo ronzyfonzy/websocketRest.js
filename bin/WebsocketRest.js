@@ -299,7 +299,7 @@ class WebsocketRest {
 							delete req.data;
 						}
 
-						addRequestMethods(req);
+						req = addRequestMethods(req);
 
 						try{
 							self.modules[req['module']][req['method']](req, socket);

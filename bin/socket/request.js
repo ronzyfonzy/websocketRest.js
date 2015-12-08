@@ -26,4 +26,6 @@ module.exports = function (req) {
 			log.info(`websocket-rest (socket.validate.${name})`,'pass');
 		}
 	};
+
+	return req;
 };
