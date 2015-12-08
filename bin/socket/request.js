@@ -1,7 +1,7 @@
 "use strict";
 var Vjson = require('jsonschema').Validator;
 
-module.exports = function (req) {
+module.exports = function (socket,req,log) {
 
 	req.isValidated = true;
 
