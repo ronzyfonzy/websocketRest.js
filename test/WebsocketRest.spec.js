@@ -28,6 +28,7 @@ describe('WebsocketRest', function () {
         socket = new WebSocket('http://localhost:9000/api/test?param0=param');
 
         socket.on('open',function(){
+
             done();
         });
 

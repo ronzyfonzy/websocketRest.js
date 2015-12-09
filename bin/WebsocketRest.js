@@ -2,7 +2,7 @@
 
 var status = require('http-status-codes');
 var addSocketResponse = require('./socket/response');
-var addSocketRequest = require('./socket/request');
+var addRequestMethods = require('./socket/request');
 var addSocketKeys = require('./socket/keys');
 var addSocketMethods = require('./socket/methods');
 
@@ -39,13 +39,6 @@ class WebsocketRest {
 		this.onUrlClose = {};
 
 		/**
-		 * All connected clients.
-		 * @type {{}}
-		 * @private
-		 */
-		this._connectedClients = {};
-
-		/**
 		 * Winston logger instance
 		 * @type {null}
 		 */
@@ -78,9 +71,15 @@ class WebsocketRest {
 	 * @param key
 	 * @returns {*}
 	 */
-	getConnectedClient(key){
-		if(key in this._connectedClients){
-			return this._connectedClients[key];
+	getConnectedClient(key) {
+		for (let cliI in this.socket.clients) {
+			if (this.socket.clients[cliI].key == key) {
+				try {
+					this.socket.clients[cliI].ping();
+					return this.socket.clients[cliI];
+				} catch (err) {
+				}
+			}
 		}
 	}
 
@@ -89,8 +88,17 @@ class WebsocketRest {
 	 *
 	 * @returns {{}|*}
 	 */
-	getConnectedClients(){
-		return this._connectedClients;
+	getConnectedClients() {
+		var connectedCli = [];
+		for (let cliI in this.socket.clients) {
+			try {
+				this.socket.clients[cliI].ping();
+				connectedCli.push(this.socket.clients[cliI]);
+			} catch (err) {
+			}
+		}
+
+		return connectedCli;
 	}
 
 	/**
@@ -128,7 +136,6 @@ class WebsocketRest {
 			this.onUrlConnect[url] = function(socket){
 				try {
 					fun(socket,function(){
-						self._connectedClients[socket.key] = socket;
 						self._log.info('websocket-rest (socket.connection)',{
 							message: 'Client has connected',
 							socket: {
@@ -233,7 +240,6 @@ class WebsocketRest {
         this.socket.on('connection', function (socket) {
 
 	        addSocketResponse(socket,self.apiVersion,self._log);
-	        addSocketRequest(socket,self.apiVersion,self._log);
 	        addSocketKeys(socket);
 	        addSocketMethods(socket,self.apiVersion,self._log);
 
@@ -241,14 +247,6 @@ class WebsocketRest {
 
 			socket.on('close',function(){
 				try{
-					//Remove connected clients is here because self scopping.
-					if(socket.key in self._connectedClients){
-						delete self._connectedClients[socket.key];
-					} else {
-						self._log.warn('websocket-rest (socket.onClose)',{
-							message : 'Socket closed but not founded in connectedClients'
-						});
-					}
 					if (socket.urlPath in self.onUrlClose) {
 						self.onUrlClose[socket.urlPath](socket);
 					}
@@ -299,6 +297,8 @@ class WebsocketRest {
 							req.body = req.data;
 							delete req.data;
 						}
+
+						req = addRequestMethods(socket, req, self._log);
 
 						try{
 							self.modules[req['module']][req['method']](req, socket);
