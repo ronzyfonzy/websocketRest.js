@@ -71,15 +71,15 @@ class WebsocketRest {
 	 * @param key
 	 * @returns {*}
 	 */
-	getConnectedClient(key){
-		if(var cliI in this.socket.clients){
-			if(this.socket.clients[cliI].key == key){
-
+	getConnectedClient(key) {
+		for (let cliI in this.socket.clients) {
+			if (this.socket.clients[cliI].key == key) {
+				try {
+					this.socket.clients[cliI].ping();
+					return this.socket.clients[cliI];
+				} catch (err) {
+				}
 			}
-			try{
-				this.socket.clients[cliI].ping();
-				return this.socket.clients[cliI];
-			} catch (err){ }
 		}
 	}
 
@@ -88,13 +88,14 @@ class WebsocketRest {
 	 *
 	 * @returns {{}|*}
 	 */
-	getConnectedClients(){
+	getConnectedClients() {
 		var connectedCli = [];
-		if(var cliI in this.socket.clients){
-			try{
+		for (let cliI in this.socket.clients) {
+			try {
 				this.socket.clients[cliI].ping();
 				connectedCli.push(this.socket.clients[cliI]);
-			} catch (err){ }
+			} catch (err) {
+			}
 		}
 
 		return connectedCli;
