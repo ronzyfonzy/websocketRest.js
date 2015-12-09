@@ -39,13 +39,6 @@ class WebsocketRest {
 		this.onUrlClose = {};
 
 		/**
-		 * All connected clients.
-		 * @type {{}}
-		 * @private
-		 */
-		this._connectedClients = {};
-
-		/**
 		 * Winston logger instance
 		 * @type {null}
 		 */
@@ -79,8 +72,14 @@ class WebsocketRest {
 	 * @returns {*}
 	 */
 	getConnectedClient(key){
-		if(key in this._connectedClients){
-			return this._connectedClients[key];
+		if(var cliI in this.socket.clients){
+			if(this.socket.clients[cliI].key == key){
+
+			}
+			try{
+				this.socket.clients[cliI].ping();
+				return this.socket.clients[cliI];
+			} catch (err){ }
 		}
 	}
 
@@ -90,7 +89,15 @@ class WebsocketRest {
 	 * @returns {{}|*}
 	 */
 	getConnectedClients(){
-		return this._connectedClients;
+		var connectedCli = [];
+		if(var cliI in this.socket.clients){
+			try{
+				this.socket.clients[cliI].ping();
+				connectedCli.push(this.socket.clients[cliI]);
+			} catch (err){ }
+		}
+
+		return connectedCli;
 	}
 
 	/**
