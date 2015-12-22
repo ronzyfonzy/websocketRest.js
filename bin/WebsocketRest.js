@@ -274,6 +274,15 @@ class WebsocketRest {
 
 	        if(false === self._onConnection(socket)) return;
 
+	        try {
+		        self.onEvent();
+	        } catch (err) {
+		        self._log.fatal('websocket-rest (socket.onEvent)', {
+			        message: 'Found new undiscovered error!',
+			        stack: err.stack
+		        });
+	        }
+
 			socket.on('close',function(){
 				try{
 					if (socket.urlPath in self.onUrlClose) {
