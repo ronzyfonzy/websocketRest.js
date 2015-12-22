@@ -65,8 +65,8 @@ class WebsocketRest {
 	 *
 	 * @param fun
 	 */
-	registerOnMessage(fun){
-		this.onMessage = fun;
+	registerOnEvent(fun){
+		this.onEvent = fun;
 	}
 
 	/**
