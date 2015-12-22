@@ -274,8 +274,6 @@ class WebsocketRest {
 
 	        if(false === self._onConnection(socket)) return;
 
-	        self.onEvent();
-
 			socket.on('close',function(){
 				try{
 					if (socket.urlPath in self.onUrlClose) {
@@ -343,7 +341,7 @@ class WebsocketRest {
 							self._log.fatal('websocket-rest (socket.onMessage)',{
 								message : 'Found new undiscowered error!',
 								stack : err.stack
-							})
+							});
 						}
 					}
 	            } catch (err){
