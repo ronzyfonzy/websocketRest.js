@@ -38,6 +38,8 @@ class WebsocketRest {
 		 */
 		this.onUrlClose = {};
 
+		this.onMessage = function(req,socket){};
+
 		/**
 		 * Winston logger instance
 		 * @type {null}
@@ -55,6 +57,15 @@ class WebsocketRest {
         this.socket = socket;
         this.apiVersion = apiVersion;
     }
+
+	/**
+	 * Register function that will execute every time message will come from client.
+	 *
+	 * @param fun
+	 */
+	registerOnMessage(fun){
+		this.onMessage = fun;
+	}
 
 	/**
 	 * Logger must have next methods.
@@ -302,6 +313,7 @@ class WebsocketRest {
 
 						try{
 							self.modules[req['module']][req['method']](req, socket);
+							self.onMessage(req,socket);
 						} catch (err){
 							self._log.fatal('websocket-rest (socket.onMessage)',{
 								message : 'Found new undiscowered error!',
