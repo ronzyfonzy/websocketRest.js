@@ -63,16 +63,16 @@ class WebsocketRest {
 	_connectionsCheck() {
 		var self = this;
 		setTimeout(function () {
-			let sockets = self.getConnectedClients();
-			for (let i in sockets) {
-				try{
-					sockets[i].ping();
-				} catch(err){
+			for (let i in self.socket.clients) {
+				try {
+					self.socket.clients[i].ping();
+				} catch (err) {
 
 				}
-				sockets[i].pingsSent++;
-				if (sockets[i].pingsSent >= 3) {
-					sockets[i].close();
+				self.socket.clients[i].pingsSent++;
+				if (self.socket.clients[i].pingsSent >= 3) {
+					self.onUrlClose[self.socket.clients[i].urlPath](self.socket.clients[i]);
+					self.socket.clients.splice(i, 1);
 				}
 			}
 			self._connectionsCheck();
