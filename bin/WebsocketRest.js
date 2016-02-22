@@ -119,7 +119,6 @@ class WebsocketRest {
 		for (let cliI in this.socket.clients) {
 			if (this.socket.clients[cliI].key == key) {
 				try {
-					this.socket.clients[cliI].ping();
 					return this.socket.clients[cliI];
 				} catch (err) {
 				}
@@ -136,7 +135,6 @@ class WebsocketRest {
 		var connectedCli = [];
 		for (let cliI in this.socket.clients) {
 			try {
-				this.socket.clients[cliI].ping();
 				connectedCli.push(this.socket.clients[cliI]);
 			} catch (err) {
 			}
