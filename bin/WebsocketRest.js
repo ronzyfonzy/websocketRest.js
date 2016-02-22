@@ -63,11 +63,10 @@ class WebsocketRest {
 	_connectionsCheck() {
 		var self = this;
 		setTimeout(function () {
-			let sockets = this.getConnectedClients();
+			let sockets = self.getConnectedClients();
 			for (let i in sockets) {
 				sockets[i].ping();
 				sockets[i].pingsSent++;
-				console.log(sockets[i].pingsSent);
 				if (sockets[i].pingsSent >= 3) {
 					sockets[i].close();
 				}
