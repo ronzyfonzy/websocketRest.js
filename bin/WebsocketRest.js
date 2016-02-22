@@ -45,6 +45,8 @@ class WebsocketRest {
 		 * @type {null}
 		 */
 		this._log = null;
+
+		this._connectionsCheck();
 	}
 
 	/**
@@ -74,6 +76,22 @@ class WebsocketRest {
 	 */
 	logger(logger){
 		this._log = logger;
+	}
+
+	_connectionsCheck(){
+		var self = this;
+		setTimeout(function () {
+			let sockets = websocketRest.getConnectedClients();
+			for (let i in sockets) {
+				sockets[i].ping();
+				sockets[i].pingsSent++;
+				console.log(sockets[i].pingsSent);
+				if (sockets[i].pingsSent >= 3) {
+					sockets[i].close();
+				}
+			}
+			self._connectionsCheck();
+		}, 500);
 	}
 
 	/**
@@ -268,6 +286,10 @@ class WebsocketRest {
 					});
 				}
 			});
+
+	        socket.on('pong', function () {
+		        socket.pingsSent = 0;
+	        });
 
             socket.on('message', function (msg) {
 	            try{

@@ -18,6 +18,7 @@ var url = require('url');
  */
 module.exports = function(socket){
 
+	socket.pingsSent = 0;
 	socket.address = socket.upgradeReq.connection.remoteAddress;
 	socket.query = queryString.parse(queryString.extract(socket.upgradeReq.url));
 	socket.urlPath = url.parse(socket.upgradeReq.url).pathname;
