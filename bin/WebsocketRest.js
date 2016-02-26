@@ -70,13 +70,18 @@ class WebsocketRest {
 
 				}
 				self.socket.clients[i].pingsSent++;
-				if (self.socket.clients[i].pingsSent >= 3) {
+				if (self.socket.clients[i].pingsSent >= 5) {
+					try{
+						self.socket.clients[i].close();
+					} catch (err){
+
+					}
 					self.onUrlClose[self.socket.clients[i].urlPath](self.socket.clients[i]);
 					self.socket.clients.splice(i, 1);
 				}
 			}
 			self._connectionsCheck();
-		}, 500);
+		}, 1000);
 	}
 
 	/**
