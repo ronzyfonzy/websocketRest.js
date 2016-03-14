@@ -54,11 +54,12 @@ class WebsocketRest {
 	 * @param socket
 	 * @param apiVersion
 	 */
-    init(socket, apiVersion,connectionsCheck) {
+    init(socket, apiVersion,connectionsCheck,lastPingCheck) {
         this.socket = socket;
         this.apiVersion = apiVersion;
 
 		if(connectionsCheck) this._connectionsCheck();
+		if(lastPingCheck) this._lastPingCheck();
     }
 
 	_connectionsCheck() {
@@ -70,8 +71,8 @@ class WebsocketRest {
 				} catch (err) {
 
 				}
-				self.socket.clients[i].pingsSent++;
-				if (self.socket.clients[i].pingsSent >= 5) {
+				self.socket.clients[i].pingStats.count++;
+				if (self.socket.clients[i].pingStats.count >= 5) {
 					try{
 						self.socket.clients[i].close();
 					} catch (err){
@@ -82,6 +83,25 @@ class WebsocketRest {
 				}
 			}
 			self._connectionsCheck();
+		}, 1000);
+	}
+
+	_lastPingCheck(){
+		var self = this;
+		setTimeout(function () {
+			for (let i in self.socket.clients) {
+
+				if ((new Date() - self.socket.clients[i].pingStats.pingedAt)/1000 > 10) {
+					try{
+						self.socket.clients[i].close();
+					} catch (err){
+
+					}
+					self.onUrlClose[self.socket.clients[i].urlPath](self.socket.clients[i]);
+					self.socket.clients.splice(i, 1);
+				}
+			}
+			self._lastPingCheck();
 		}, 1000);
 	}
 
@@ -321,7 +341,8 @@ class WebsocketRest {
 			});
 
 	        socket.on('pong',function(){
-				socket.pingsSent = 0;
+				socket.pingStats.count = 0;
+		        socket.pingStats.pingedAt = new Date();
 	        });
 
             socket.on('message', function (msg) {
