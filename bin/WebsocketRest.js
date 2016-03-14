@@ -46,7 +46,6 @@ class WebsocketRest {
 		 */
 		this._log = null;
 
-		this._connectionsCheck();
 	}
 
 	/**
@@ -55,9 +54,11 @@ class WebsocketRest {
 	 * @param socket
 	 * @param apiVersion
 	 */
-    init(socket, apiVersion) {
+    init(socket, apiVersion,connectionsCheck) {
         this.socket = socket;
         this.apiVersion = apiVersion;
+
+		if(connectionsCheck) this._connectionsCheck();
     }
 
 	_connectionsCheck() {
