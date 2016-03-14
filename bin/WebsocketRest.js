@@ -345,6 +345,11 @@ class WebsocketRest {
 		        socket.pingStats.pingedAt = new Date();
 	        });
 
+	        socket.on('ping',function(){
+		        socket.pingStats.count = 0;
+		        socket.pingStats.pingedAt = new Date();
+	        });
+
             socket.on('message', function (msg) {
 	            try{
 
