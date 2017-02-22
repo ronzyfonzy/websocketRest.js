@@ -38,7 +38,7 @@ class WebsocketRest {
 		 */
 		this.onUrlClose = {};
 
-		this.onMessage = function(req,socket){};
+		this.onEvent = function(){};
 
 		/**
 		 * Winston logger instance
@@ -46,7 +46,6 @@ class WebsocketRest {
 		 */
 		this._log = null;
 
-		this._connectionsCheck();
 	}
 
 	/**
@@ -55,18 +54,64 @@ class WebsocketRest {
 	 * @param socket
 	 * @param apiVersion
 	 */
-    init(socket, apiVersion) {
+    init(socket, apiVersion,connectionsCheck,lastPingCheck) {
         this.socket = socket;
         this.apiVersion = apiVersion;
+
+		if(connectionsCheck) this._connectionsCheck();
+		if(lastPingCheck) this._lastPingCheck();
     }
+
+	_connectionsCheck() {
+		var self = this;
+		setTimeout(function () {
+			for (let i in self.socket.clients) {
+				try {
+					self.socket.clients[i].ping();
+				} catch (err) {
+
+				}
+				self.socket.clients[i].pingStats.count++;
+				if (self.socket.clients[i].pingStats.count >= 5) {
+					try{
+						self.socket.clients[i].close();
+					} catch (err){
+
+					}
+					self.onUrlClose[self.socket.clients[i].urlPath](self.socket.clients[i]);
+					self.socket.clients.splice(i, 1);
+				}
+			}
+			self._connectionsCheck();
+		}, 1000);
+	}
+
+	_lastPingCheck(){
+		var self = this;
+		setTimeout(function () {
+			for (let i in self.socket.clients) {
+
+				if ((new Date() - self.socket.clients[i].pingStats.pingedAt)/1000 > 10) {
+					try{
+						self.socket.clients[i].close();
+					} catch (err){
+
+					}
+					self.onUrlClose[self.socket.clients[i].urlPath](self.socket.clients[i]);
+					self.socket.clients.splice(i, 1);
+				}
+			}
+			self._lastPingCheck();
+		}, 1000);
+	}
 
 	/**
 	 * Register function that will execute every time message will come from client.
 	 *
 	 * @param fun
 	 */
-	registerOnMessage(fun){
-		this.onMessage = fun;
+	registerOnEvent(fun){
+		this.onEvent = fun;
 	}
 
 	/**
@@ -104,7 +149,6 @@ class WebsocketRest {
 		for (let cliI in this.socket.clients) {
 			if (this.socket.clients[cliI].key == key) {
 				try {
-					this.socket.clients[cliI].ping();
 					return this.socket.clients[cliI];
 				} catch (err) {
 				}
@@ -121,7 +165,6 @@ class WebsocketRest {
 		var connectedCli = [];
 		for (let cliI in this.socket.clients) {
 			try {
-				this.socket.clients[cliI].ping();
 				connectedCli.push(this.socket.clients[cliI]);
 			} catch (err) {
 			}
@@ -274,10 +317,20 @@ class WebsocketRest {
 
 	        if(false === self._onConnection(socket)) return;
 
+	        try {
+		        self.onEvent();
+	        } catch (err) {
+		        self._log.fatal('websocket-rest (socket.onEvent)', {
+			        message: 'Found new undiscovered error!',
+			        stack: err.stack
+		        });
+	        }
+
 			socket.on('close',function(){
 				try{
 					if (socket.urlPath in self.onUrlClose) {
 						self.onUrlClose[socket.urlPath](socket);
+						self.onEvent();
 					}
 				} catch(err){
 					self._log.err(`websocket-rest (socket.onClose)`,{
@@ -287,8 +340,14 @@ class WebsocketRest {
 				}
 			});
 
-	        socket.on('pong', function () {
-		        socket.pingsSent = 0;
+	        socket.on('pong',function(){
+				socket.pingStats.count = 0;
+		        socket.pingStats.pingedAt = new Date();
+	        });
+
+	        socket.on('ping',function(){
+		        socket.pingStats.count = 0;
+		        socket.pingStats.pingedAt = new Date();
 	        });
 
             socket.on('message', function (msg) {
@@ -335,12 +394,12 @@ class WebsocketRest {
 
 						try{
 							self.modules[req['module']][req['method']](req, socket);
-							self.onMessage(req,socket);
+							self.onEvent();
 						} catch (err){
 							self._log.fatal('websocket-rest (socket.onMessage)',{
 								message : 'Found new undiscowered error!',
 								stack : err.stack
-							})
+							});
 						}
 					}
 	            } catch (err){

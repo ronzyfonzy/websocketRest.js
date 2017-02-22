@@ -57,4 +57,8 @@ $ npm install websocket-rest
 
 ## Internal working
 
+## Todo
+
+	* Add permmisions on which methods and modules socker from url can connect...
+
 
