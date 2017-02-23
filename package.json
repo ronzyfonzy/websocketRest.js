@@ -1,11 +1,11 @@
 {
   "name": "websocket-rest",
-  "version": "0.0.1",
-  "description": "Small websocket lib wraper for ws lib, similar to express.",
+  "version": "2.0.0",
+  "description": "Small websocket lib wraper for ws lib, similar to express. Original aurhor Uroš Jarc https://github.com/urosjarc/websocketRest.js",
   "main": "./bin/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/urosjarc/websocketRest.js"
+    "url": "https://github.com/ronzyfonzy/websocketRest.js"
   },
   "keywords": [
     "es6",
@@ -14,30 +14,30 @@
     "websocket-rest"
   ],
   "author": {
-    "name": "Uroš Jarc",
-    "email": "jar.fmf@gmail.com",
-    "url": "https://github.com/urosjarc"
+    "name": "Robert Tajnšek",
+    "email": "robi.tajnsek@gmail.com",
+    "url": "https://github.com/ronzyfonzy"
   },
   "license": "MIT",
-  "homepage": "https://github.com/urosjarc/websocket-rest",
+  "homepage": "https://github.com/ronzyfonzy/websocketRest.js",
   "scripts": {
     "test": "node test"
   },
   "dependencies": {
     "http-status-codes": "^1.0.5",
-    "query-string": "^3.0.0",
-    "url": "^0.11.0"
+    "query-string": "^4.3.2",
+    "jsonschema": "^1.1.1"
   },
   "devDependencies": {
-    "chai": "^2.2.0",
-    "grunt": "^0.4.5",
-    "grunt-babel": "^5.0.3",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-jsdoc": "^1.0.0",
+    "chai": "^3.5.0",
+    "grunt": "^1.0.1",
+    "grunt-babel": "^6.0.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-jsdoc": "^2.1.0",
     "grunt-mocha-test": "^0.12.7",
     "load-grunt-tasks": "^3.3.0",
-    "mocha": "^2.3.3",
+    "mocha": "^3.2.0",
     "time-grunt": "^1.2.2",
-    "ws": "^0.8.0"
+    "ws": "^2.1.0"
   }
 }
